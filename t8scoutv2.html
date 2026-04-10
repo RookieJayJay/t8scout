@@ -1,0 +1,2783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>T8 Scout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & BASE ─────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;-webkit-tap-highlight-color:transparent}
+body{
+  height:100%;min-height:100vh;
+  background:#0a0b0d;
+  color:#e8e9eb;
+  font-family:'Barlow',sans-serif;
+  font-size:14px;
+  line-height:1.5;
+  overflow-x:hidden;
+}
+
+/* ── CSS VARIABLES ────────────────────────────────────────────────── */
+:root{
+  --bg:        #0a0b0d;
+  --bg2:       #111318;
+  --bg3:       #181b22;
+  --bg4:       #1e2229;
+  --border:    #2a2d35;
+  --border2:   #353840;
+  --text:      #e8e9eb;
+  --text2:     #9ca3af;
+  --text3:     #6b7280;
+  --accent:    #3b82f6;
+  --accent2:   #2563eb;
+  --red:       #ef4444;
+  --red2:      #dc2626;
+  --green:     #22c55e;
+  --yellow:    #eab308;
+  --orange:    #f97316;
+  --nav-h:     60px;
+  --header-h:  52px;
+}
+
+/* ── SCROLLBAR ────────────────────────────────────────────────────── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── LAYOUT ───────────────────────────────────────────────────────── */
+#app{
+  display:flex;flex-direction:column;
+  height:100vh;max-height:100vh;
+  overflow:hidden;
+}
+
+/* ── TOP HEADER ───────────────────────────────────────────────────── */
+#header{
+  height:var(--header-h);
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 16px;
+  gap:12px;
+  flex-shrink:0;
+  z-index:100;
+}
+#header-logo{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px;font-weight:900;
+  letter-spacing:.05em;
+  color:var(--text);
+  flex-shrink:0;
+}
+#header-logo span{color:var(--accent)}
+#mychar-selector{
+  display:flex;align-items:center;gap:8px;
+  margin-left:auto;
+}
+#mychar-label{
+  font-size:11px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);
+  flex-shrink:0;
+}
+#mychar-pills{
+  display:flex;gap:4px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+#mychar-pills::-webkit-scrollbar{display:none}
+.mychar-pill{
+  height:28px;padding:0 10px;
+  background:var(--bg4);
+  border:1px solid var(--border2);
+  border-radius:4px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;font-weight:700;
+  letter-spacing:.04em;
+  color:var(--text2);
+  cursor:pointer;
+  white-space:nowrap;
+  transition:all .15s;
+  flex-shrink:0;
+}
+.mychar-pill:hover{border-color:var(--accent);color:var(--text)}
+.mychar-pill.active{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#fff;
+}
+
+/* ── MAIN CONTENT ─────────────────────────────────────────────────── */
+#main{
+  flex:1;
+  overflow:hidden;
+  position:relative;
+}
+.tab-view{
+  position:absolute;inset:0;
+  overflow-y:auto;
+  display:none;
+  padding-bottom:calc(var(--nav-h) + 16px);
+}
+.tab-view.active{display:block}
+
+/* ── BOTTOM NAV ───────────────────────────────────────────────────── */
+#bottom-nav{
+  height:var(--nav-h);
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  display:flex;
+  flex-shrink:0;
+  z-index:100;
+}
+.nav-btn{
+  flex:1;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:3px;
+  background:none;border:none;
+  color:var(--text3);
+  cursor:pointer;
+  transition:color .15s;
+  padding:6px 0;
+}
+.nav-btn:hover{color:var(--text2)}
+.nav-btn.active{color:var(--accent)}
+.nav-btn svg{width:20px;height:20px;flex-shrink:0}
+.nav-btn span{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+}
+
+/* ── SHARED COMPONENTS ────────────────────────────────────────────── */
+.section-pad{padding:16px}
+.page-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:22px;font-weight:800;
+  letter-spacing:.04em;
+  color:var(--text);
+  margin-bottom:4px;
+}
+.page-sub{
+  font-size:13px;color:var(--text3);
+  margin-bottom:16px;
+}
+.card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+}
+.card-header{
+  padding:12px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+}
+.card-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:15px;font-weight:700;
+  letter-spacing:.04em;
+  color:var(--text);
+}
+.card-body{padding:12px 16px}
+
+.pill{
+  display:inline-flex;align-items:center;
+  height:20px;padding:0 7px;
+  border-radius:3px;
+  font-family:'DM Mono',monospace;
+  font-size:10px;font-weight:500;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  flex-shrink:0;
+}
+.pill-mid{background:#1e3a5f;color:#60a5fa}
+.pill-high{background:#3b2f1a;color:#fbbf24}
+.pill-low{background:#1a2e1a;color:#4ade80}
+.pill-throw{background:#2d1a2e;color:#c084fc}
+.pill-spec{background:#1a2835;color:#67e8f9}
+
+.prop-tag{
+  display:inline-flex;align-items:center;
+  height:18px;padding:0 6px;
+  border-radius:2px;
+  background:var(--bg4);
+  border:1px solid var(--border2);
+  font-size:10px;font-weight:600;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--text3);
+}
+.prop-tag.crush{color:#f97316;border-color:#431407}
+.prop-tag.homing{color:#a78bfa;border-color:#2e1a47}
+.prop-tag.tracking{color:#60a5fa;border-color:#1e3a5f}
+.prop-tag.splat{color:#f87171;border-color:#450a0a}
+.prop-tag.key{color:#fbbf24;border-color:#3b2f1a}
+.prop-tag.pc{color:#fb923c;border-color:#431407}
+
+.ob-plus{color:var(--green);font-weight:600}
+.ob-minus{color:var(--red);font-weight:600}
+.ob-zero{color:var(--text2)}
+.ob-launch{color:#c084fc;font-weight:600}
+.ob-knd{color:var(--orange);font-weight:600}
+
+/* Frame coloring helpers */
+.frame-val{font-family:'DM Mono',monospace;font-size:12px}
+
+/* ── SEARCH INPUT ─────────────────────────────────────────────────── */
+.search-wrap{position:relative;margin-bottom:12px}
+.search-input{
+  width:100%;height:40px;
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:6px;
+  padding:0 12px 0 36px;
+  color:var(--text);
+  font-family:'Barlow',sans-serif;
+  font-size:14px;
+  outline:none;
+  transition:border-color .15s;
+}
+.search-input::placeholder{color:var(--text3)}
+.search-input:focus{border-color:var(--accent)}
+.search-icon{
+  position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  color:var(--text3);pointer-events:none;
+}
+
+/* ── FILTER BAR ───────────────────────────────────────────────────── */
+.filter-bar{
+  display:flex;gap:6px;
+  overflow-x:auto;
+  padding-bottom:2px;
+  margin-bottom:12px;
+  scrollbar-width:none;
+}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-btn{
+  height:30px;padding:0 12px;
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:4px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:13px;font-weight:700;
+  letter-spacing:.04em;
+  color:var(--text3);
+  cursor:pointer;
+  white-space:nowrap;
+  transition:all .15s;
+  flex-shrink:0;
+}
+.filter-btn:hover{border-color:var(--border);color:var(--text2)}
+.filter-btn.active{
+  background:var(--bg4);
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+/* ── CHARACTER GRID ───────────────────────────────────────────────── */
+.char-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(70px,1fr));
+  gap:8px;
+}
+.char-tile{
+  aspect-ratio:1;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:6px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:4px;
+  cursor:pointer;
+  transition:all .15s;
+  padding:6px;
+  position:relative;
+}
+.char-tile:hover{border-color:var(--accent);background:var(--bg4)}
+.char-tile.active{border-color:var(--accent);background:#1a2540}
+.char-tile.placeholder{opacity:.4;cursor:default}
+.char-tile.placeholder:hover{border-color:var(--border);background:var(--bg3)}
+.char-tile-short{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:900;
+  letter-spacing:.02em;
+  color:var(--text);
+  line-height:1;
+}
+.char-tile-name{
+  font-size:9px;font-weight:600;
+  letter-spacing:.04em;
+  color:var(--text3);
+  text-align:center;
+  line-height:1.2;
+  text-transform:uppercase;
+}
+.char-tile-tier{
+  position:absolute;top:4px;right:5px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:10px;font-weight:800;
+  color:var(--text3);
+}
+.tier-S{color:#ef4444}
+.tier-A{color:#f97316}
+.tier-B{color:#eab308}
+.tier-C{color:#6b7280}
+
+/* ── MOVE TABLE ───────────────────────────────────────────────────── */
+.move-table-wrap{overflow-x:auto}
+.move-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+.move-table th{
+  padding:8px 10px;
+  text-align:left;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+  background:var(--bg2);
+  position:sticky;top:0;
+}
+.move-table td{
+  padding:8px 10px;
+  border-bottom:1px solid var(--border);
+  vertical-align:middle;
+}
+.move-table tr:last-child td{border-bottom:none}
+.move-table tr:hover td{background:var(--bg3)}
+.move-table tr.key-move td:first-child{
+  border-left:2px solid var(--yellow);
+}
+.move-name{
+  font-weight:600;
+  color:var(--text);
+  font-size:13px;
+}
+.move-input{
+  font-family:'DM Mono',monospace;
+  font-size:11px;
+  color:var(--accent);
+}
+.props-cell{display:flex;flex-wrap:wrap;gap:3px}
+
+/* ── HOME TAB ─────────────────────────────────────────────────────── */
+#home-punish-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:8px;
+  margin-bottom:16px;
+}
+.punish-window-card{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:12px;
+  cursor:default;
+}
+.pw-frames{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:28px;font-weight:900;
+  color:var(--accent);
+  line-height:1;
+  margin-bottom:4px;
+}
+.pw-label{
+  font-size:11px;font-weight:600;
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  margin-bottom:8px;
+}
+.pw-move{
+  font-family:'DM Mono',monospace;
+  font-size:11px;color:var(--text2);
+  margin-bottom:2px;
+}
+.pw-move strong{color:var(--text);font-style:normal}
+
+/* ── SCOUT TAB ────────────────────────────────────────────────────── */
+.matchup-card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+  margin-bottom:12px;
+}
+.matchup-card-top{
+  padding:16px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;gap:16px;
+}
+.mc-char-info{flex:1}
+.mc-char-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:26px;font-weight:900;
+  letter-spacing:.03em;
+  color:var(--text);
+  line-height:1;
+  margin-bottom:4px;
+}
+.mc-char-style{
+  font-size:12px;color:var(--text3);
+  margin-bottom:8px;
+}
+.mc-char-desc{
+  font-size:13px;color:var(--text2);
+  line-height:1.5;
+}
+.mc-threat{
+  display:flex;flex-direction:column;
+  align-items:center;gap:4px;
+  flex-shrink:0;
+}
+.mc-threat-dots{
+  display:flex;gap:3px;
+}
+.threat-dot{
+  width:10px;height:10px;
+  border-radius:50%;
+  background:var(--border2);
+}
+.threat-dot.filled{background:var(--red)}
+.threat-dot.filled.t1{background:var(--green)}
+.threat-dot.filled.t2{background:var(--yellow)}
+.threat-dot.filled.t3{background:var(--yellow)}
+.threat-dot.filled.t4{background:var(--orange)}
+.threat-dot.filled.t5{background:var(--red)}
+.mc-threat-label{
+  font-size:10px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);
+}
+
+.mc-meta-row{
+  display:flex;flex-wrap:wrap;gap:8px;
+  padding:12px 16px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg3);
+}
+.mc-meta-item{
+  display:flex;align-items:center;gap:8px;
+  flex:1;min-width:140px;
+}
+.mc-meta-icon{
+  width:32px;height:32px;
+  background:var(--bg4);
+  border:1px solid var(--border2);
+  border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  font-size:14px;
+}
+.mc-meta-label{
+  font-size:10px;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text3);
+  margin-bottom:2px;
+}
+.mc-meta-value{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:15px;font-weight:700;
+  color:var(--text);
+}
+.mc-meta-value.ss-left{color:#60a5fa}
+.mc-meta-value.ss-right{color:#f97316}
+.mc-meta-value.ss-either{color:var(--green)}
+
+.danger-list{padding:0}
+.danger-item{
+  padding:12px 16px;
+  border-bottom:1px solid var(--border);
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:start;
+}
+.danger-item:last-child{border-bottom:none}
+.di-top{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:4px;
+}
+.di-name{font-weight:700;font-size:14px;color:var(--text)}
+.di-input{
+  font-family:'DM Mono',monospace;
+  font-size:11px;color:var(--accent);
+}
+.di-why{font-size:12px;color:var(--text3);line-height:1.4}
+.di-frames{
+  display:flex;flex-direction:column;
+  align-items:flex-end;gap:3px;
+  flex-shrink:0;
+}
+.di-frame-row{
+  display:flex;align-items:center;gap:4px;
+  font-size:11px;color:var(--text3);
+}
+.di-frame-row span{
+  font-family:'DM Mono',monospace;
+  font-size:12px;font-weight:600;
+}
+
+.punish-section{padding:12px 16px}
+.punish-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;
+  border-bottom:1px solid var(--border);
+}
+.punish-item:last-child{border-bottom:none}
+.pi-move{flex:1}
+.pi-name{font-weight:600;font-size:13px;color:var(--text);margin-bottom:2px}
+.pi-input{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)}
+.pi-stats{
+  display:flex;flex-direction:column;
+  align-items:flex-end;gap:3px;
+  flex-shrink:0;
+}
+.pi-dmg{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:800;
+  color:var(--text);
+  line-height:1;
+}
+.difficulty-badge{
+  height:18px;padding:0 7px;
+  border-radius:2px;
+  font-size:10px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+}
+.diff-easy{background:#14291a;color:#4ade80;border:1px solid #1a3d22}
+.diff-medium{background:#2d2208;color:#fbbf24;border:1px solid #3d2f0a}
+.diff-hard{background:#2d0e0e;color:#f87171;border:1px solid #3d1212}
+
+/* ── COMPARE TAB ──────────────────────────────────────────────────── */
+.compare-header{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:8px;margin-bottom:12px;
+}
+.compare-picker{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:12px;
+  text-align:center;
+}
+.cp-label{
+  font-size:11px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:8px;
+}
+.cp-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px;font-weight:900;
+  color:var(--text);
+}
+
+/* ── DIVIDERS / LABELS ────────────────────────────────────────────── */
+.section-label{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:11px;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text3);
+  padding:8px 16px 6px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.section-label-count{
+  font-size:12px;font-weight:600;
+  color:var(--text3);
+}
+
+/* ── EMPTY STATE ──────────────────────────────────────────────────── */
+.empty-state{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:48px 16px;
+  text-align:center;
+  gap:12px;
+}
+.empty-state svg{color:var(--border2)}
+.empty-state h3{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:800;
+  color:var(--text2);
+}
+.empty-state p{font-size:13px;color:var(--text3)}
+
+/* ── DESKTOP ADAPTATIONS ──────────────────────────────────────────── */
+@media(min-width:768px){
+  :root{--header-h:56px}
+  .char-grid{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}
+  .section-pad{padding:20px}
+  .move-table{font-size:14px}
+  #home-punish-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+}
+@media(min-width:1024px){
+  .char-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr))}
+  .matchup-card-top{padding:20px}
+  .mc-char-name{font-size:32px}
+}
+
+/* ── ANIMATIONS ───────────────────────────────────────────────────── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.tab-view.active{animation:fadeIn .18s ease}
+.char-tile{animation:fadeIn .12s ease both}
+
+/* ── SORT HEADER ──────────────────────────────────────────────────── */
+.sort-th{cursor:pointer;user-select:none}
+.sort-th:hover{color:var(--text2)}
+.sort-indicator{margin-left:4px;opacity:.5}
+
+/* ── INLINE EXPAND ────────────────────────────────────────────────── */
+.expand-row td{
+  padding:0 !important;
+  background:var(--bg3) !important;
+}
+.expand-inner{
+  padding:12px 16px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+@media(min-width:600px){
+  .expand-inner{grid-template-columns:repeat(3,1fr)}
+}
+.expand-section h4{
+  font-size:10px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:6px;
+}
+
+/* ── NO DATA BADGE ────────────────────────────────────────────────── */
+.no-data{
+  display:inline-flex;align-items:center;
+  height:22px;padding:0 8px;
+  background:var(--bg4);
+  border:1px solid var(--border);
+  border-radius:3px;
+  font-size:11px;color:var(--text3);
+  font-style:italic;
+}
+
+/* ── MY CHARACTER HEADER BUTTON ───────────────────────────────────── */
+#mychar-btn{
+  margin-left:auto;
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:6px;
+  padding:6px 12px;
+  cursor:pointer;
+  transition:all .15s;
+  flex-shrink:0;
+}
+#mychar-btn:hover{border-color:var(--accent);background:var(--bg4)}
+#mychar-btn-label{
+  font-size:10px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);
+  white-space:nowrap;
+}
+#mychar-btn-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:17px;font-weight:900;
+  letter-spacing:.04em;
+  color:var(--text);
+  white-space:nowrap;
+}
+#mychar-btn-icon{color:var(--text3);flex-shrink:0}
+
+/* ── ONBOARDING OVERLAY ───────────────────────────────────────────── */
+#onboarding{
+  position:fixed;inset:0;
+  background:var(--bg);
+  z-index:1000;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  overflow-y:auto;
+  padding:24px 16px 100px;
+}
+#onboarding-inner{
+  width:100%;max-width:600px;
+}
+#onboarding-logo{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:28px;font-weight:900;
+  letter-spacing:.05em;
+  color:var(--text);
+  margin-bottom:24px;
+}
+#onboarding-logo span{color:var(--accent)}
+#onboarding-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:36px;font-weight:900;
+  letter-spacing:.02em;
+  color:var(--text);
+  margin-bottom:8px;
+  line-height:1;
+}
+#onboarding-sub{
+  font-size:14px;color:var(--text3);
+  margin-bottom:24px;
+  line-height:1.5;
+}
+#onboarding-footer{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  padding:16px;
+  display:flex;align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  z-index:1001;
+}
+#onboarding-selected-label{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:16px;font-weight:700;
+  color:var(--text2);
+}
+#onboarding-confirm{
+  height:42px;padding:0 24px;
+  background:var(--accent);
+  border:none;border-radius:6px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:16px;font-weight:800;
+  letter-spacing:.05em;
+  color:#fff;cursor:pointer;
+  transition:all .15s;
+  flex-shrink:0;
+}
+#onboarding-confirm:hover:not(:disabled){background:var(--accent2)}
+#onboarding-confirm:disabled{
+  background:var(--bg4);
+  color:var(--text3);
+  cursor:default;
+}
+.char-tile.onboard-selected{
+  border-color:var(--accent) !important;
+  background:#1a2540 !important;
+}
+.char-tile.onboard-selected .char-tile-short{color:var(--accent)}
+
+/* ── CHARACTER SWITCHER OVERLAY ───────────────────────────────────── */
+#char-switcher{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.7);
+  z-index:500;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+}
+#char-switcher-inner{
+  width:100%;max-width:600px;
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  border-radius:16px 16px 0 0;
+  max-height:80vh;
+  overflow-y:auto;
+  animation:slideUp .2s ease;
+}
+@keyframes slideUp{
+  from{transform:translateY(100%);opacity:0}
+  to{transform:none;opacity:1}
+}
+#switcher-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 16px 0;
+}
+#switcher-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:800;
+  letter-spacing:.04em;
+  color:var(--text);
+}
+#switcher-close{
+  width:32px;height:32px;
+  background:var(--bg4);
+  border:1px solid var(--border2);
+  border-radius:50%;
+  color:var(--text3);
+  font-size:14px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+#switcher-close:hover{color:var(--text);border-color:var(--border);}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ONBOARDING OVERLAY -->
+  <div id="onboarding" style="display:none">
+    <div id="onboarding-inner">
+      <div id="onboarding-logo">T8<span>SCOUT</span></div>
+      <div id="onboarding-title">Who do you play?</div>
+      <div id="onboarding-sub">Select your main character to get started. You can change this any time.</div>
+      <div class="search-wrap" style="margin-bottom:16px">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search-input" id="onboard-search" placeholder="Search character…" autocomplete="off">
+      </div>
+      <div id="onboard-char-grid" class="char-grid"></div>
+      <div id="onboarding-footer">
+        <div id="onboarding-selected-label">No character selected</div>
+        <button id="onboarding-confirm" disabled onclick="confirmOnboarding()">Let's go →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARACTER SWITCHER OVERLAY -->
+  <div id="char-switcher" style="display:none" onclick="closeSwitcher(event)">
+    <div id="char-switcher-inner">
+      <div id="switcher-header">
+        <div id="switcher-title">Change Character</div>
+        <button id="switcher-close" onclick="closeSwitcherDirect()">✕</button>
+      </div>
+      <div class="search-wrap" style="padding:12px 16px 0;margin-bottom:0">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search-input" id="switcher-search" placeholder="Search character…" autocomplete="off">
+      </div>
+      <div style="padding:12px 16px">
+        <div id="switcher-char-grid" class="char-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP HEADER -->
+  <header id="header">
+    <div id="header-logo">T8<span>SCOUT</span></div>
+    <button id="mychar-btn" onclick="openSwitcher()">
+      <div id="mychar-btn-label">Playing</div>
+      <div id="mychar-btn-name">—</div>
+      <svg id="mychar-btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    </button>
+  </header>
+
+  <!-- MAIN CONTENT AREA -->
+  <div id="main">
+
+    <!-- ── TAB: HOME — Opponent character grid ───────────────────── -->
+    <div class="tab-view active" id="view-home">
+      <div class="section-pad">
+        <div id="home-header">
+          <div class="page-title" id="home-title">Who are you fighting?</div>
+          <div class="page-sub" id="home-sub">Select an opponent to load their matchup card</div>
+        </div>
+        <div class="search-wrap">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="search-input" id="home-search" placeholder="Search character…" autocomplete="off">
+        </div>
+        <div id="home-char-grid" class="char-grid"></div>
+      </div>
+    </div>
+
+    <!-- ── TAB: SCOUT — Matchup card + full move list ────────────── -->
+    <div class="tab-view" id="view-scout">
+
+      <!-- Scout card view -->
+      <div id="scout-card-section" style="display:none">
+        <div style="padding:12px 16px 0">
+          <button id="scout-back-btn" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--text3);cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;padding:0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            All characters
+          </button>
+        </div>
+        <div id="scout-card-content"></div>
+
+        <!-- Move list section — merged from database tab -->
+        <div id="scout-moves-section" style="display:none">
+          <div class="section-label" style="margin-top:8px">
+            Full Move List
+            <span class="section-label-count" id="scout-move-count"></span>
+          </div>
+          <div style="padding:8px 16px">
+            <div class="filter-bar" id="scout-filter-bar">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="key">Key</button>
+              <button class="filter-btn" data-filter="LOW">Lows</button>
+              <button class="filter-btn" data-filter="launcher">Launchers</button>
+              <button class="filter-btn" data-filter="plus">+ On Block</button>
+              <button class="filter-btn" data-filter="punishable">Punishable</button>
+              <button class="filter-btn" data-filter="stance">Stances</button>
+            </div>
+            <div class="search-wrap" style="margin-bottom:0">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input class="search-input" id="scout-move-search" placeholder="Search move name or input…" autocomplete="off">
+            </div>
+          </div>
+          <div id="scout-move-table-wrap"></div>
+        </div>
+      </div>
+
+      <!-- Scout empty state (no char selected) -->
+      <div id="scout-empty-section">
+        <div class="empty-state" style="padding:80px 16px">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <h3>No character selected</h3>
+          <p>Go to Home and tap an opponent to scout them</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── TAB: COMPARE ───────────────────────────────────────────── -->
+    <div class="tab-view" id="view-compare">
+      <div class="section-pad">
+        <div class="page-title">Compare</div>
+        <div class="page-sub">Side-by-side move data</div>
+
+        <div class="compare-header">
+          <div class="compare-picker" id="compare-pick-a">
+            <div class="cp-label">Character A</div>
+            <div class="cp-name" id="cmp-a-name">— Select —</div>
+          </div>
+          <div class="compare-picker" id="compare-pick-b">
+            <div class="cp-label">Character B</div>
+            <div class="cp-name" id="cmp-b-name">— Select —</div>
+          </div>
+        </div>
+
+        <div class="filter-bar" id="cmp-filter-bar">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="LOW">Lows</button>
+          <button class="filter-btn" data-filter="launcher">Launchers</button>
+          <button class="filter-btn" data-filter="plus">+ On Block</button>
+          <button class="filter-btn" data-filter="punishable">Punishable</button>
+        </div>
+
+        <div id="cmp-content"></div>
+
+        <!-- Character pickers -->
+        <div id="cmp-picker-modal" style="display:none;margin-top:12px">
+          <div class="search-wrap">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input class="search-input" id="cmp-char-search" placeholder="Search character…" autocomplete="off">
+          </div>
+          <div id="cmp-char-grid" class="char-grid"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+
+  <!-- BOTTOM NAV — 3 tabs -->
+  <nav id="bottom-nav">
+    <button class="nav-btn active" data-tab="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="nav-btn" data-tab="scout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span>Scout</span>
+    </button>
+    <button class="nav-btn" data-tab="compare">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+      <span>Compare</span>
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<script>
+// ================================================================
+// DATA
+// ================================================================
+
+// Matchup metadata: sidestep direction, threat level (1-5), archetype summary
+// ss: 'L' = sidestep left, 'R' = sidestep right, 'N' = neutral/character-dependent
+const MATCHUP_META = {
+  kazuya:    {ss:'L', threat:5, summary:'Mishima bully. Respect EWGF at all times — it\'s safe at +5. His game is mid pressure into Hellsweep/throw mixup at close range. Backdash to bait whiffs.'},
+  jin:       {ss:'L', threat:5, summary:'Complete character with no real weakness. Hellsweep and ff+2 are his gameplan anchors. His df+2 is safe and launches — never give him free frames.'},
+  nina:      {ss:'L', threat:4, summary:'Pressure queen. df+4 at +1 is her core tool — she just loops it. Watch for chain throws at close range. Sidestep left beats most of her strings.'},
+  paul:      {ss:'L', threat:3, summary:'Honest damage dealer. Backdash Deathfist constantly — it\'s his best whiff punish and it\'s punishable. Respect f+2 at +10 on hit.'},
+  law:       {ss:'L', threat:3, summary:'Dragon Charge is the whole game — interrupt the stance entry with a fast mid. Dragon Tail is -14 on block, full launch every time. Duck jabs.'},
+  king:      {ss:'L', threat:4, summary:'King wins with throws, not moves. Stay outside throw range and make him come to you. Break Giant Swing with 2, Tombstone with 1+2.'},
+  xiaoyu:    {ss:'R', threat:4, summary:'The AOP stance is the threat — interrupt it immediately with a mid. She has no range game so never let her get close. SWR makes most strings whiff.'},
+  hwoarang:  {ss:'R', threat:3, summary:'Duck his highs from stance — multiple stance highs means crouching gives free WS punishes. Backlash at +5 is his pressure anchor — respect it.'},
+  dragunov:  {ss:'L', threat:5, summary:'White Breath is functionally safe — don\'t overextend punishing it. ws+1 at +5 from crouch is his pressure tool. His fc,df+2 at +3 is the most dangerous FC move in the game.'},
+  reina:     {ss:'L', threat:5, summary:'Mishima fundamentals plus unpredictable Taido movement. Her Electric is +3 on block. Sentai at +4 demands respect. Treat her like Kazuya with extra evasion.'},
+  feng:      {ss:'L', threat:5, summary:'Methodical and oppressive. df+1,2 is nearly safe and loops into frame traps. His fc,df+2 at +3 is his strongest tool — deny him crouch setups.'},
+  deviljin:  {ss:'L', threat:5, summary:'All the Mishima tools plus a safe range tool in Devil Beam. Heaven\'s Door is -14 — launch it every time. Keep range to avoid f+1+2 mixup.'},
+  heihachi:  {ss:'L', threat:5, summary:'Classic Mishima with the hardest-hitting throw game. Thunder God Fist is -14, never let it slide. Duck 1,2,1 for the third hit for a ws punish.'},
+  lili:      {ss:'R', threat:3, summary:'Splendid Heel is her core low — -14 on block, full launch. Matterhorn at +3 is her approach tool. Rose Garden is evasive but punishable at -10 if you respect it.'},
+  asuka:     {ss:'L', threat:2, summary:'Defensive character — use lows and throws to bypass her reversal. Her offense is honest and predictable. f+1+2 at +2 is her strongest pressure tool.'},
+  steve:     {ss:'L', threat:3, summary:'No kicks means his lows are all punches — consistent low poke pressure destroys his stance game. Duck Peekaboo highs for free WS launches.'},
+  leroy:     {ss:'L', threat:3, summary:'Parry beats highs and mids — throw and low poke to bypass it. White Crane at +2 demands respect. uf+1+2 is -14 on block — full launch.'},
+  yoshimitsu:{ss:'L', threat:2, summary:'Knowledge matchup. Hit Indian Stance with a mid immediately. Low poke Flea stance. Sword Stab is -12 on block — punish consistently.'},
+  claudio:   {ss:'L', threat:3, summary:'Starburst transforms his game — apply pressure to prevent activation. In Starburst his df+2 becomes +5 on block. His offense is linear and SWL counters most of his kit.'},
+  jack8:     {ss:'L', threat:3, summary:'Slow but devastating at the wall. Keep center stage at all costs. His d+1+2 low is reactable and -18 on block. Giant Swing break with 2.'},
+  lars:      {ss:'L', threat:3, summary:'Saver stance is his pressure system — interrupt it before he settles. SE 3 at +2 is his safest option from Saver. Orbital Heel is his go-to high crush.'},
+  victor:    {ss:'L', threat:3, summary:'Victor plays a gadget trap spacing game. His kicks are often linear — SWL makes most of them whiff. Savate Kick and ff+3 are his +on-block tools.'},
+  azucena:   {ss:'L', threat:3, summary:'Coffee Power doubles her threat level — constant pressure prevents activation. Duck 4,4 (both high) for a free WS launch. Her ff+3 at +3 is the approach anchor.'},
+  kuma:      {ss:'L', threat:2, summary:'Kuma is slow — backdash constantly and make him commit. His wall damage is enormous so keep center stage. Bear Hug command throw breaks with 1+2.'},
+  shaheen:   {ss:'L', threat:2, summary:'Honest and linear. His entire kit is beaten by SWL. f+4 at +2 is his best pressure tool. Great matchup to practice fundamentals on.'},
+  leo:       {ss:'L', threat:3, summary:'KNK stance creates a low/mid mixup — interrupt it with a fast jab before he commits. d+3,2 low starter is his core mix. -12 on block — punish hard.'},
+  alisa:     {ss:'L', threat:3, summary:'Chainsaw mode arms floating around her are visual chaos — ignore them and play her like a normal character. df+1,2 at -1 is her safest poke. Wall pressure is devastating.'},
+  zafina:    {ss:'R', threat:2, summary:'Pure knowledge matchup — her stances look chaotic but each option is predictable. Hit Tarantula with a mid immediately. Study her options in training.'},
+  raven:     {ss:'L', threat:3, summary:'Don\'t panic on the teleport — hold still and punish his landing. His clone is a visual trick. His offense is actually linear — SWL beats most of it.'},
+  clive:     {ss:'L', threat:3, summary:'Guest character with fire-based tools. Scarlet Cyclone is his main launcher — evasive but -12 on block. His kit is honest and straightforward underneath the fire effects.'},
+  // New characters (placeholders - data coming via CSV)
+  bryan:     {ss:'L', threat:4, summary:'Taunt-powered pressure machine. Snake Edge is a deceptive low launcher — watch for it. Jet Upper is his main punish. At max rage he becomes extremely dangerous.'},
+  eddy:      {ss:'R', threat:3, summary:'Capoeira movement makes his strings look random — they\'re not. His low game from floor positions is dangerous. SWR beats the evasive movements.'},
+  fahkumram: {ss:'L', threat:4, summary:'Muay Thai powerhouse with enormous range on kicks. His linear offense means sidestep is very effective. High damage ceiling on punishes.'},
+  jun:       {ss:'L', threat:4, summary:'Defensive style with Kazama reversals. Similar to Asuka but with more offensive tools. Low poke and throw to bypass her counter game.'},
+  lee:       {ss:'L', threat:3, summary:'Infinite Azure pressure strings. His mids are safe and plus. Sidestep left beats most of his linear kicks. -13 on block from most strings.'},
+  lidia:     {ss:'L', threat:3, summary:'Stance-based Polish martial arts. Her moves gain properties based on her current breathing state. Interrupt stance transitions with fast mids.'},
+  miaryzo:   {ss:'R', threat:3, summary:'New character — data coming. Placeholder matchup card.'},
+  panda:     {ss:'L', threat:2, summary:'Kuma\'s counterpart — same general gameplan. Slow and powerful. Keep center stage, backdash, and punish committed moves. Bear Hug breaks with 1+2.'},
+  anna:      {ss:'L', threat:4, summary:'Nina\'s sister with a similar toolkit. Excellent throw game and chain throws. df+4 at +1 is her core poke. Very similar matchup knowledge to Nina.'},
+  armorking: {ss:'L', threat:4, summary:'King variant with darker mix. Similar throw game but different normals. Break Giant Swing with 2. His mid game is more aggressive than King\'s.'},
+};
+
+// Difficulty calculator based on input complexity
+function calcDifficulty(input, type) {
+  if (!input) return 'easy';
+  if (type === 'THROW') return 'easy';
+  const parts = input.split(/[,+]/).length;
+  if (input.includes('hcb') || input.includes('qcb') || input.includes('qcf')) return 'medium';
+  if (input.includes('ws') || input.includes('fc') || input.includes('FC')) return 'medium';
+  if (parts >= 5) return 'hard';
+  if (parts >= 4) return 'medium';
+  return 'easy';
+}
+
+// Frame value display helper
+function fmtOB(val) {
+  if (!val || val === '—') return '<span class="ob-zero">—</span>';
+  if (val === 'Launch') return '<span class="ob-launch">Launch</span>';
+  if (val === 'KND' || val === '+KND') return '<span class="ob-knd">KND</span>';
+  if (val === 'Combo') return '<span class="ob-launch">Combo</span>';
+  const n = parseInt(val);
+  if (isNaN(n)) return `<span class="ob-zero">${val}</span>`;
+  if (n > 0) return `<span class="ob-plus">${val}</span>`;
+  if (n < 0) return `<span class="ob-minus">${val}</span>`;
+  return `<span class="ob-zero">${val}</span>`;
+}
+
+function blockTypeClass(type) {
+  switch(type) {
+    case 'MID': return 'pill-mid';
+    case 'HIGH': return 'pill-high';
+    case 'LOW': return 'pill-low';
+    case 'THROW': return 'pill-throw';
+    case 'SPEC': return 'pill-spec';
+    default: return 'pill-mid';
+  }
+}
+
+// ================================================================
+// CHARACTER DATA
+// ================================================================
+const CHARS = [
+  {
+    id:'steve', name:'Steve Fox', short:'ST', tier:'A', style:'Boxing', difficulty:'Hard',
+    origin:'England', role:['poke','defensive'],
+    desc:'Pure boxing. No kicks — exceptional jab game, excellent ducking counters, strong CH tools. Wins by controlling space and exploiting stance transitions.',
+    moves:[
+      {name:'Peekaboo 1,2',input:'1,2 (PHX)',startup:10,ob:'+2',oh:'+12',onCH:'+12',dmg:24,type:'HIGH',key:1,props:['tracking'],stanceReq:'PHX'},
+      {name:'Ducking Upper',input:'FC uf+2',startup:15,ob:'-12',oh:'Launch',onCH:'Launch',dmg:28,type:'MID',key:1,props:['high_crush']},
+      {name:'Flicker Cross',input:'b+1 (FLI)',startup:16,ob:'-8',oh:'KND',onCH:'KND',dmg:26,type:'MID',key:1,props:['wall_splat'],stanceReq:'FLI'},
+      {name:'PHX 2',input:'PHX 2',startup:13,ob:'-4',oh:'+8',onCH:'+8',dmg:20,type:'MID',props:[],stanceReq:'PHX'},
+      {name:'PHX 1',input:'PHX 1',startup:10,ob:'+1',oh:'+8',onCH:'+8',dmg:14,type:'HIGH',key:1,props:['tracking'],stanceReq:'PHX'},
+      {name:'FLI 2',input:'FLI 2',startup:13,ob:'-4',oh:'+8',onCH:'+8',dmg:18,type:'MID',props:[],stanceReq:'FLI'},
+      {name:'FLI 1',input:'FLI 1',startup:16,ob:'-14',oh:'KND',onCH:'KND',dmg:20,type:'LOW',key:1,props:[],stanceReq:'FLI'},
+      {name:'1,2',input:'1,2',startup:10,ob:'-5',oh:'+7',onCH:'+7',dmg:20,type:'HIGH',props:[]},
+      {name:'df+1,2',input:'df+1,2',startup:13,ob:'-3',oh:'+8',onCH:'+8',dmg:24,type:'MID',props:['tracking']},
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'d+1',input:'d+1',startup:13,ob:'-11',oh:'+2',onCH:'+2',dmg:14,type:'LOW',key:1,props:[]},
+      {name:'d+2',input:'d+2',startup:17,ob:'-14',oh:'KND',onCH:'KND',dmg:20,type:'LOW',key:1,props:[]},
+      {name:'b+2',input:'b+2',startup:16,ob:'-8',oh:'+8',onCH:'Launch',dmg:22,type:'MID',props:[]},
+      {name:'b+1',input:'b+1',startup:14,ob:'-3',oh:'+8',onCH:'Launch',dmg:18,type:'MID',props:[]},
+      {name:'ws+2',input:'ws+2',startup:14,ob:'-1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'ws+1',input:'ws+1',startup:13,ob:'+2',oh:'+8',onCH:'+8',dmg:16,type:'MID',props:[]},
+      {name:'ff+2',input:'ff+2',startup:18,ob:'-10',oh:'KND',onCH:'KND',dmg:26,type:'MID',props:['wall_splat']},
+      {name:'f+2',input:'f+2',startup:13,ob:'+0',oh:'+8',onCH:'+14',dmg:18,type:'MID',props:[]},
+    ],
+    dangerMoves:[
+      {name:'Peekaboo 1,2',input:'1,2 (PHX)',ob:'+2',oh:'+12',why:'From Peekaboo guard, +2 on block. Jab back only — don\'t try anything slow.'},
+      {name:'Ducking Upper',input:'FC uf+2',ob:'-12',oh:'Launch',why:'He ducks your attack and launches. Don\'t use slow or high moves.'},
+      {name:'Flicker Cross',input:'b+1 (FLI)',ob:'-8',oh:'KND',why:'Wall carry mid from Flicker. -8 on block — punish with your fastest option.'},
+      {name:'FLI 1',input:'FLI 1',ob:'-14',oh:'KND',why:'Low from Flicker stance. -14 on block — full launch punish.'},
+    ],
+  },
+  {
+    id:'kazuya', name:'Kazuya Mishima', short:'KZ', tier:'S', style:'Mishima Karate', difficulty:'Very Hard',
+    origin:'Japan', role:['aggressive','mixup'],
+    desc:'The original Mishima. EWGF is the highest-skill, highest-reward move in the game. Dominant mid-range, powerful throws, and a clean backdash make him a constant threat at all times.',
+    moves:[
+      {name:'Electric WGF',input:'f,N,d,df+2',startup:13,ob:'+5',oh:'Launch',onCH:'Launch',dmg:32,type:'MID',key:1,props:['high_crush','wall_splat']},
+      {name:'Wind God Fist',input:'f,N,d,df+2',startup:15,ob:'-13',oh:'Launch',onCH:'Launch',dmg:25,type:'MID',props:['high_crush']},
+      {name:"Heaven's Door",input:'f+3,4',startup:15,ob:'-14',oh:'Launch',onCH:'Launch',dmg:38,type:'MID',key:1,props:['natural_combo']},
+      {name:'df+4',input:'df+4',startup:13,ob:'+0',oh:'+7',onCH:'+7',dmg:16,type:'MID',props:['tracking']},
+      {name:'df+1,2',input:'df+1,2',startup:13,ob:'-3',oh:'+8',onCH:'+8',dmg:24,key:1,props:['tracking']},
+      {name:'df+1',input:'df+1',startup:13,ob:'-1',oh:'+7',onCH:'+7',dmg:14,type:'MID',props:[]},
+      {name:'1,1,2',input:'1,1,2',startup:10,ob:'-9',oh:'+5',onCH:'+5',dmg:30,type:'HIGH',props:['tracking']},
+      {name:'1,2',input:'1,2',startup:10,ob:'-5',oh:'+7',onCH:'+7',dmg:20,type:'HIGH',props:[]},
+      {name:'b+2,1',input:'b+2,1',startup:17,ob:'-9',oh:'+5',onCH:'Launch',dmg:28,type:'MID',props:['linear']},
+      {name:'d+4',input:'d+4',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'d+3+4',input:'d+3+4',startup:20,ob:'-18',oh:'KND',onCH:'KND',dmg:22,type:'LOW',key:1,props:['linear']},
+      {name:'db+4',input:'db+4',startup:20,ob:'-18',oh:'KND',onCH:'KND',dmg:22,type:'LOW',key:1,props:[]},
+      {name:'uf+4',input:'uf+4',startup:22,ob:'-11',oh:'Launch',onCH:'Launch',dmg:24,type:'MID',key:1,props:['high_crush','low_crush']},
+      {name:'ff+2',input:'ff+2',startup:20,ob:'-12',oh:'KND',onCH:'KND',dmg:30,type:'MID',props:['wall_splat']},
+      {name:'ws+2',input:'ws+2',startup:14,ob:'-1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'ws+4',input:'ws+4',startup:13,ob:'+0',oh:'+6',onCH:'+6',dmg:16,type:'MID',props:[]},
+      {name:'Demon Uppercut',input:'f,N,d+2',startup:20,ob:'-12',oh:'Launch',onCH:'Launch',dmg:28,type:'MID',key:1,props:['high_crush']},
+      {name:'Giant Swing',input:'hcb,f+1+2',startup:12,ob:'—',oh:'KND',onCH:'KND',dmg:55,type:'THROW',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'Electric WGF',input:'f,N,d,df+2',ob:'+5',oh:'Launch',why:'Safe at +5 on block and launches on hit. Respect this at mid range at all times.'},
+      {name:"Heaven's Door",input:'f+3,4',ob:'-14',oh:'Launch',why:'-14 on block — full launch punish every time.'},
+      {name:'df+4',input:'df+4',ob:'+0',oh:'+7',why:'Safe poke at zero. He throws this freely to stop you crouching.'},
+      {name:'d+3+4',input:'d+3+4',ob:'-18',oh:'KND',why:'Mishima sweep — slow but leads to oki. -18 on block.'},
+    ],
+  },
+  {
+    id:'jin', name:'Jin Kazama', short:'JN', tier:'S', style:'Karate / Mishima', difficulty:'Medium',
+    origin:'Japan', role:['aggressive','poke'],
+    desc:'The balanced powerhouse. Excellent at all ranges — Mishima lows, Karate mids, safe launchers. One of the most complete characters in T8.',
+    moves:[
+      {name:'Hellsweep',input:'f,N,d,df+4',startup:18,ob:'-14',oh:'Launch',onCH:'Launch',dmg:22,type:'LOW',key:1,props:['high_crush']},
+      {name:'df+2',input:'df+2',startup:14,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'Savage Sword',input:'b+2,3',startup:15,ob:'-11',oh:'KND',onCH:'KND',dmg:34,type:'MID',key:1,props:['wall_splat','natural_combo']},
+      {name:'ff+2',input:'ff+2',startup:19,ob:'+3',oh:'KND',onCH:'KND',dmg:26,type:'MID',key:1,props:['wall_splat']},
+      {name:'2,1',input:'2,1',startup:10,ob:'-5',oh:'+7',onCH:'Launch',dmg:22,type:'HIGH',props:[]},
+      {name:'1,2',input:'1,2',startup:10,ob:'-5',oh:'+7',onCH:'+7',dmg:20,type:'HIGH',props:[]},
+      {name:'d+4',input:'d+4',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'d+3+4',input:'d+3+4',startup:20,ob:'-18',oh:'KND',onCH:'KND',dmg:24,type:'LOW',key:1,props:['linear']},
+      {name:'df+1,2',input:'df+1,2',startup:13,ob:'-3',oh:'+8',onCH:'+8',dmg:24,props:['tracking']},
+      {name:'df+1',input:'df+1',startup:13,ob:'-1',oh:'+7',onCH:'+7',dmg:14,type:'MID',props:[]},
+      {name:'3~4',input:'3~4',startup:14,ob:'-13',oh:'Launch',onCH:'Launch',dmg:28,type:'MID',key:1,props:[]},
+      {name:'b+4',input:'b+4',startup:17,ob:'-11',oh:'+5',onCH:'Launch',dmg:22,type:'MID',props:['linear']},
+      {name:'uf+4',input:'uf+4',startup:20,ob:'-10',oh:'Launch',onCH:'Launch',dmg:24,type:'MID',props:['high_crush']},
+      {name:'ws+2',input:'ws+2',startup:14,ob:'-1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'ws+4',input:'ws+4',startup:13,ob:'+0',oh:'+6',onCH:'+6',dmg:16,type:'MID',props:[]},
+      {name:'1,2,3',input:'1,2,3',startup:10,ob:'-9',oh:'+8',onCH:'+8',dmg:32,type:'HIGH',props:['tracking']},
+      {name:'Rage Art',input:'1+2+3+4 rage',startup:20,ob:'-20',oh:'KND',onCH:'KND',dmg:65,type:'MID',key:1,props:['power_crush']},
+    ],
+    dangerMoves:[
+      {name:'Hellsweep',input:'f,N,d,df+4',ob:'-14',oh:'Launch',why:'Launches on hit from a crouch-cancel. -14 on block — full launch.'},
+      {name:'Savage Sword',input:'b+2,3',ob:'-11',oh:'KND',why:'-11 on block but massive damage and wall carry.'},
+      {name:'ff+2',input:'ff+2',ob:'+3',oh:'KND',why:'+3 on block — he keeps his turn. Don\'t retaliate with anything slow.'},
+      {name:'3~4',input:'3~4',ob:'-13',oh:'Launch',why:'Safe launcher. Punish it consistently.'},
+    ],
+  },
+  {
+    id:'bryan', name:'Bryan Fury', short:'BR', tier:'A', style:'Kickboxing', difficulty:'Medium',
+    origin:'USA', role:['aggressive','poke'],
+    desc:'Taunt-powered powerhouse. Snake Edge is a deceptive low that launches. Jet Upper is the main punish. At max Taunt Jet Upper buff he becomes extremely dangerous.',
+    moves:[
+      {name:'Jet Upper',input:'f,f+2',startup:18,ob:'-12',oh:'Launch',onCH:'Launch',dmg:28,type:'MID',key:1,props:['wall_splat']},
+      {name:'Snake Edge',input:'db+4',startup:20,ob:'-14',oh:'Launch',onCH:'Launch',dmg:22,type:'LOW',key:1,props:['high_crush']},
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'df+1,2',input:'df+1,2',startup:13,ob:'-3',oh:'+8',onCH:'+8',dmg:24,type:'MID',props:['tracking']},
+      {name:'df+4',input:'df+4',startup:13,ob:'+0',oh:'+7',onCH:'+7',dmg:16,type:'MID',props:[]},
+      {name:'b+2,3',input:'b+2,3',startup:16,ob:'-11',oh:'KND',onCH:'KND',dmg:30,type:'MID',props:['wall_splat']},
+      {name:'1,2',input:'1,2',startup:10,ob:'-5',oh:'+7',onCH:'+7',dmg:20,type:'HIGH',props:[]},
+      {name:'d+3',input:'d+3',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'Taunt',input:'1+3+4',startup:0,ob:'—',oh:'—',onCH:'—',dmg:0,type:'SPEC',key:1,props:[]},
+      {name:'ws+2',input:'ws+2',startup:14,ob:'-1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'Snake Edge',input:'db+4',ob:'-14',oh:'Launch',why:'Deceptive low launcher. -14 on block but risky to mash against.'},
+      {name:'Jet Upper',input:'f,f+2',ob:'-12',oh:'Launch',why:'His primary punish and combo starter. -12 on block.'},
+      {name:'Taunt',input:'1+3+4',ob:'—',oh:'—',why:'Buffs Jet Upper massively. Apply pressure to prevent full Taunt.'},
+    ],
+  },
+  {
+    id:'nina', name:'Nina Williams', short:'NI', tier:'S', style:'Assassination Arts', difficulty:'Hard',
+    origin:'Ireland', role:['poke','mixup'],
+    desc:'Technical pressure queen. Exceptional poking tools, insane wall carry, and a throw game that requires matchup knowledge to escape.',
+    moves:[
+      {name:'Blonde Bomb',input:'df+2',startup:13,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'df+4',input:'df+4',startup:13,ob:'+1',oh:'+8',onCH:'+8',dmg:15,type:'MID',key:1,props:['tracking']},
+      {name:'1,2,1,2',input:'1,2,1,2',startup:10,ob:'-3',oh:'+8',onCH:'+8',dmg:42,type:'HIGH',key:1,props:['tracking']},
+      {name:'d+3',input:'d+3',startup:12,ob:'-10',oh:'+2',onCH:'+2',dmg:12,type:'LOW',props:[]},
+      {name:'d+3,4',input:'d+3,4',startup:12,ob:'-15',oh:'KND',onCH:'KND',dmg:26,type:'LOW',key:1,props:[]},
+      {name:'ss+4',input:'ss+4',startup:18,ob:'-12',oh:'Launch',onCH:'Launch',dmg:28,type:'MID',key:1,props:['low_crush']},
+      {name:'fc,df+2',input:'fc,df+2',startup:16,ob:'+2',oh:'Launch',onCH:'Launch',dmg:26,type:'MID',key:1,props:[]},
+      {name:'df+1,4',input:'df+1,4',startup:13,ob:'-2',oh:'+8',onCH:'+8',dmg:26,type:'MID',props:[]},
+      {name:'b+1,4',input:'b+1,4',startup:15,ob:'-6',oh:'+8',onCH:'+8',dmg:28,type:'MID',props:['linear']},
+      {name:'ws+4',input:'ws+4',startup:15,ob:'-11',oh:'KND',onCH:'KND',dmg:24,type:'MID',props:[]},
+      {name:'Multi Throw',input:'2+4',startup:13,ob:'—',oh:'KND',onCH:'KND',dmg:60,type:'THROW',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'df+4',input:'df+4',ob:'+1',oh:'+8',why:'+1 on block — she loops this constantly. Respect after blocking.'},
+      {name:'Blonde Bomb',input:'df+2',ob:'+1',oh:'Launch',why:'Safe launcher at +1. Her primary punish.'},
+      {name:'d+3,4',input:'d+3,4',ob:'-15',oh:'KND',why:'Low knockdown combo. -15 on block — full launch.'},
+      {name:'Multi Throw',input:'2+4',ob:'—',oh:'KND',why:'Chain throw. If you miss the break it chains into 60+ damage.'},
+    ],
+  },
+  {
+    id:'paul', name:'Paul Phoenix', short:'PL', tier:'A', style:'Judo / Street Brawling', difficulty:'Low',
+    origin:'USA', role:['aggressive'],
+    desc:'The damage king. Deathfist is terrifying and the rest of his kit is simple but effective. Great fundamentals character.',
+    moves:[
+      {name:'Deathfist',input:'qcf+2',startup:21,ob:'-13',oh:'KND',onCH:'KND',dmg:30,type:'MID',key:1,props:['wall_splat']},
+      {name:'Shredder',input:'df+1,2',startup:13,ob:'-4',oh:'+7',onCH:'Launch',dmg:26,type:'MID',key:1,props:['tracking']},
+      {name:'f+2',input:'f+2',startup:12,ob:'+2',oh:'+10',onCH:'+10',dmg:18,type:'MID',key:1,props:[]},
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'d+2',input:'d+2',startup:18,ob:'-14',oh:'KND',onCH:'KND',dmg:20,type:'LOW',key:1,props:[]},
+      {name:'d+4',input:'d+4',startup:14,ob:'-14',oh:'+0',onCH:'+0',dmg:14,type:'LOW',props:[]},
+      {name:'4',input:'4',startup:16,ob:'+1',oh:'+8',onCH:'+8',dmg:20,type:'MID',props:[]},
+      {name:'Demolition Man',input:'b+2,2',startup:18,ob:'-12',oh:'KND',onCH:'KND',dmg:35,type:'MID',props:['linear']},
+      {name:'1,2',input:'1,2',startup:10,ob:'-5',oh:'+7',onCH:'+7',dmg:20,type:'HIGH',props:[]},
+      {name:'ws+2',input:'ws+2',startup:13,ob:'+0',oh:'Launch',onCH:'Launch',dmg:20,type:'MID',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'Deathfist',input:'qcf+2',ob:'-13',oh:'KND',why:'-13 on block but massive damage. Backdash to bait the whiff.'},
+      {name:'f+2',input:'f+2',ob:'+2',oh:'+10',why:'+10 on hit — leads to frame traps and throw mixups.'},
+      {name:'d+2',input:'d+2',ob:'-14',oh:'KND',why:'Knockdown low into oki. -14 on block — punish every time.'},
+    ],
+  },
+  {
+    id:'law', name:'Marshall Law', short:'LW', tier:'A', style:'Jeet Kune Do', difficulty:'Medium',
+    origin:'USA', role:['aggressive','poke'],
+    desc:'Fast pressure inspired by Bruce Lee. Dragon Charge stance creates relentless high/low mixups.',
+    moves:[
+      {name:'Dragon Tail',input:'b+4',startup:18,ob:'-14',oh:'KND',onCH:'KND',dmg:25,type:'LOW',key:1,props:[]},
+      {name:'df+2',input:'df+2',startup:13,ob:'+1',oh:'Launch',onCH:'Launch',dmg:20,type:'MID',key:1,props:[]},
+      {name:'DC 4',input:'DC~4',startup:15,ob:'+3',oh:'KND',onCH:'KND',dmg:20,type:'MID',key:1,props:[],stanceReq:'DC'},
+      {name:'DC 3',input:'DC~3',startup:18,ob:'-16',oh:'KND',onCH:'KND',dmg:22,type:'LOW',key:1,props:[],stanceReq:'DC'},
+      {name:'Junkyard Kick',input:'f+3,3,4',startup:14,ob:'-15',oh:'KND',onCH:'KND',dmg:42,type:'HIGH',key:1,props:['natural_combo']},
+      {name:'1,2,3',input:'1,2,3',startup:10,ob:'-9',oh:'+8',onCH:'+8',dmg:32,type:'HIGH',props:['tracking']},
+      {name:'d+3',input:'d+3',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'uf+3',input:'uf+3',startup:19,ob:'-10',oh:'Launch',onCH:'Launch',dmg:24,type:'MID',key:1,props:['high_crush','low_crush']},
+      {name:'ws+4',input:'ws+4',startup:13,ob:'+0',oh:'KND',onCH:'KND',dmg:22,type:'MID',props:[]},
+    ],
+    dangerMoves:[
+      {name:'Dragon Tail',input:'b+4',ob:'-14',oh:'KND',why:'Hard-to-see low with knockdown. -14 on block — always punish.'},
+      {name:'DC 4',input:'DC~4',ob:'+3',oh:'KND',why:'+3 on block from Dragon Charge. He\'ll frame trap off this.'},
+      {name:'Junkyard Kick',input:'f+3,3,4',ob:'-15',oh:'KND',why:'Triple kick string — all highs. Duck any hit for a punish.'},
+    ],
+  },
+  {
+    id:'king', name:'King', short:'KG', tier:'A', style:'Pro Wrestling', difficulty:'Medium',
+    origin:'Mexico', role:['mixup','grappler'],
+    desc:'Most dangerous throw game in Tekken 8. Multi-break chains deal over 80 damage. A nightmare without matchup knowledge.',
+    moves:[
+      {name:'Giant Swing',input:'hcb,f+2',startup:12,ob:'—',oh:'KND',onCH:'KND',dmg:65,type:'THROW',key:1,props:[]},
+      {name:'Tombstone',input:'qcb+1+2',startup:14,ob:'—',oh:'KND',onCH:'KND',dmg:55,type:'THROW',key:1,props:[]},
+      {name:'Low Shot',input:'db+4',startup:17,ob:'-15',oh:'KND',onCH:'KND',dmg:20,type:'LOW',key:1,props:[]},
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'f+3,4',input:'f+3,4',startup:16,ob:'-12',oh:'KND',onCH:'KND',dmg:30,type:'MID',props:['wall_splat']},
+      {name:'b+1,2',input:'b+1,2',startup:15,ob:'-11',oh:'KND',onCH:'KND',dmg:30,type:'MID',props:['linear']},
+      {name:'1,2',input:'1,2',startup:10,ob:'-5',oh:'+7',onCH:'+7',dmg:22,type:'HIGH',props:[]},
+      {name:'d+3',input:'d+3',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'ws+1+2',input:'ws+1+2',startup:15,ob:'-5',oh:'Launch',onCH:'Launch',dmg:24,type:'MID',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'Giant Swing',input:'hcb,f+2',ob:'—',oh:'KND',why:'65 damage on 2 break. Keep range — don\'t let him walk into throw range.'},
+      {name:'Low Shot',input:'db+4',ob:'-15',oh:'KND',why:'-15 on block — launch punish every time.'},
+      {name:'Tombstone',input:'qcb+1+2',ob:'—',oh:'KND',why:'55 damage, 1+2 break. Learn the overhead lift animation.'},
+    ],
+  },
+  {
+    id:'xiaoyu', name:'Ling Xiaoyu', short:'XY', tier:'A', style:'Ling-Ling School', difficulty:'Hard',
+    origin:'China', role:['mixup','defensive'],
+    desc:'The most evasive character in the game. Constant sidestep, low-profile stance transitions, and an infuriating high/low mixup from AOP stance.',
+    moves:[
+      {name:'Storming Flower',input:'AOP 2',startup:16,ob:'-9',oh:'Launch',onCH:'Launch',dmg:30,type:'MID',key:1,props:['low_crush'],stanceReq:'AOP'},
+      {name:'Hyper Cannon',input:'3+4',startup:20,ob:'-15',oh:'+5',onCH:'Launch',dmg:26,type:'LOW',key:1,props:[]},
+      {name:'AOP 3',input:'AOP 3',startup:20,ob:'-16',oh:'KND',onCH:'KND',dmg:22,type:'LOW',key:1,props:[],stanceReq:'AOP'},
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'f+3,4',input:'f+3,4',startup:13,ob:'-8',oh:'+8',onCH:'+8',dmg:28,type:'HIGH',props:['tracking']},
+      {name:'d+3',input:'d+3',startup:12,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'BT 2',input:'BT 2',startup:15,ob:'-7',oh:'Launch',onCH:'Launch',dmg:26,type:'MID',key:1,props:[],stanceReq:'BT'},
+      {name:'AOP 1',input:'AOP 1',startup:14,ob:'-4',oh:'+8',onCH:'+8',dmg:18,type:'MID',props:[],stanceReq:'AOP'},
+    ],
+    dangerMoves:[
+      {name:'AOP stance',input:'d+1+2',ob:'—',oh:'—',why:'The stance itself is evasive. Interrupt with a fast mid before she settles.'},
+      {name:'Storming Flower',input:'AOP 2',ob:'-9',oh:'Launch',why:'Mid launcher from the AOP duck. Hard to react to.'},
+      {name:'AOP 3',input:'AOP 3',ob:'-16',oh:'KND',why:'Low sweep from AOP. -16 on block — full launch.'},
+    ],
+  },
+  {
+    id:'hwoarang', name:'Hwoarang', short:'HW', tier:'B', style:'Tae Kwon Do', difficulty:'Hard',
+    origin:'South Korea', role:['aggressive','mixup'],
+    desc:'Non-stop stance cycling and kick pressure. Extremely hard to deal with on autopilot — learn the stances.',
+    moves:[
+      {name:'Hunting Hawk',input:'RFF b+3',startup:18,ob:'-13',oh:'Launch',onCH:'Launch',dmg:34,type:'MID',key:1,props:[],stanceReq:'RFF'},
+      {name:'Backlash',input:'f,f+3',startup:19,ob:'+5',oh:'KND',onCH:'KND',dmg:26,type:'MID',key:1,props:['wall_splat']},
+      {name:'LFF 4',input:'LFF 4',startup:11,ob:'+4',oh:'+12',onCH:'+12',dmg:20,type:'HIGH',key:1,props:[],stanceReq:'LFF'},
+      {name:'db+3',input:'db+3',startup:16,ob:'-16',oh:'KND',onCH:'KND',dmg:20,type:'LOW',key:1,props:[]},
+      {name:'FLA d+4',input:'FLA d+4',startup:18,ob:'-16',oh:'KND',onCH:'KND',dmg:20,type:'LOW',key:1,props:[],stanceReq:'FLA'},
+      {name:'b+3',input:'b+3',startup:20,ob:'-10',oh:'Launch',onCH:'Launch',dmg:24,type:'MID',key:1,props:[]},
+      {name:'3,3,3',input:'3,3,3',startup:14,ob:'-9',oh:'+6',onCH:'+6',dmg:42,type:'MID',props:['tracking']},
+      {name:'ws+4',input:'ws+4',startup:13,ob:'+0',oh:'KND',onCH:'KND',dmg:22,type:'MID',props:[]},
+    ],
+    dangerMoves:[
+      {name:'Backlash',input:'f,f+3',ob:'+5',oh:'KND',why:'+5 on block. Don\'t push buttons after blocking this.'},
+      {name:'LFF 4',input:'LFF 4',ob:'+4',oh:'+12',why:'+4 on block from LFF. His main frame trap starter.'},
+      {name:'db+3',input:'db+3',ob:'-16',oh:'KND',why:'Knockdown low. -16 on block — full launch punish.'},
+    ],
+  },
+  {
+    id:'dragunov', name:'Sergei Dragunov', short:'DR', tier:'S', style:'Combat Sambo', difficulty:'Medium',
+    origin:'Russia', role:['poke','defensive'],
+    desc:'Methodical. One of the safest launchers in the game, excellent punish tools, and relentless pressure with virtually no commitment.',
+    moves:[
+      {name:'White Breath',input:'df+1,2',startup:12,ob:'-1',oh:'+10',onCH:'+10',dmg:27,type:'MID',key:1,props:['tracking']},
+      {name:'3~4',input:'3~4',startup:14,ob:'-13',oh:'Launch',onCH:'Launch',dmg:28,type:'MID',key:1,props:[]},
+      {name:'ws+1',input:'ws+1',startup:13,ob:'+5',oh:'KND',onCH:'KND',dmg:22,type:'MID',key:1,props:[]},
+      {name:'db+2',input:'db+2',startup:18,ob:'-14',oh:'KND',onCH:'KND',dmg:22,type:'LOW',key:1,props:[]},
+      {name:'b+1+2',input:'b+1+2',startup:17,ob:'-7',oh:'Launch',onCH:'Launch',dmg:24,type:'MID',key:1,props:['power_crush']},
+      {name:'fc,df+2',input:'fc,df+2',startup:16,ob:'+3',oh:'Launch',onCH:'Launch',dmg:26,type:'MID',key:1,props:[]},
+      {name:'Sleeper',input:'b+2,1,2',startup:16,ob:'-14',oh:'KND',onCH:'KND',dmg:38,type:'MID',props:['wall_splat']},
+      {name:'df+4',input:'df+4',startup:13,ob:'+0',oh:'+7',onCH:'+7',dmg:16,type:'MID',props:[]},
+      {name:'1,2',input:'1,2',startup:10,ob:'-5',oh:'+7',onCH:'+7',dmg:22,type:'HIGH',props:[]},
+    ],
+    dangerMoves:[
+      {name:'White Breath',input:'df+1,2',ob:'-1',oh:'+10',why:'-1 on block — functionally safe. Jab only, never try a launcher.'},
+      {name:'ws+1',input:'ws+1',ob:'+5',oh:'KND',why:'+5 on block from crouch. Creates FC mixup pressure.'},
+      {name:'b+1+2',input:'b+1+2',ob:'-7',oh:'Launch',why:'Armored launcher. If you push a button he absorbs and launches you.'},
+      {name:'fc,df+2',input:'fc,df+2',ob:'+3',oh:'Launch',why:'+3 on block FC launcher. Don\'t give him free crouch setups.'},
+    ],
+  },
+  {
+    id:'reina', name:'Reina', short:'RE', tier:'S', style:'Mishima / Taido', difficulty:'Hard',
+    origin:'Japan', role:['aggressive','mixup'],
+    desc:'New to T8. Blends Mishima electric fundamentals with Taido spinning moves. Strong Heat game and terrifying combo damage.',
+    moves:[
+      {name:'Electric',input:'f,N,d,df+2',startup:13,ob:'+3',oh:'Launch',onCH:'Launch',dmg:28,type:'MID',key:1,props:['high_crush']},
+      {name:"Heaven's Wrath",input:'1,2,1',startup:10,ob:'-6',oh:'Launch',onCH:'Launch',dmg:34,type:'HIGH',key:1,props:['tracking']},
+      {name:'Sentai',input:'b+2',startup:16,ob:'+4',oh:'+8',onCH:'+8',dmg:22,type:'MID',key:1,props:['linear']},
+      {name:'df+1,2',input:'df+1,2',startup:12,ob:'-1',oh:'+10',onCH:'+10',dmg:24,type:'MID',key:1,props:['tracking']},
+      {name:'f+3,4',input:'f+3,4',startup:15,ob:'-14',oh:'Launch',onCH:'Launch',dmg:36,type:'MID',key:1,props:['natural_combo']},
+      {name:'d+4',input:'d+4',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'d+3+4',input:'d+3+4',startup:20,ob:'-18',oh:'KND',onCH:'KND',dmg:22,type:'LOW',key:1,props:[]},
+      {name:'ws+2',input:'ws+2',startup:14,ob:'-1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'Electric',input:'f,N,d,df+2',ob:'+3',oh:'Launch',why:'Same EWGF threat — +3 on block, launches on hit.'},
+      {name:'Sentai',input:'b+2',ob:'+4',oh:'+8',why:'+4 on block — she keeps her turn. Jab only after blocking.'},
+      {name:'f+3,4',input:'f+3,4',ob:'-14',oh:'Launch',why:'-14 on block — always launch this.'},
+    ],
+  },
+  {
+    id:'feng', name:'Feng Wei', short:'FE', tier:'S', style:'Chinese Martial Arts', difficulty:'Medium',
+    origin:'China', role:['poke','aggressive'],
+    desc:'Methodical mid-range powerhouse. Excellent frame traps, powerful CH game, and superb wall damage.',
+    moves:[
+      {name:'df+1,2',input:'df+1,2',startup:12,ob:'-1',oh:'+10',onCH:'+10',dmg:26,type:'MID',key:1,props:['tracking']},
+      {name:'b+1,2',input:'b+1,2',startup:16,ob:'-10',oh:'KND',onCH:'Launch',dmg:30,type:'MID',key:1,props:['linear','wall_splat']},
+      {name:'fc,df+2',input:'fc,df+2',startup:15,ob:'+3',oh:'Launch',onCH:'Launch',dmg:26,type:'MID',key:1,props:[]},
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'uf+3,4',input:'uf+3,4',startup:20,ob:'-13',oh:'Launch',onCH:'Launch',dmg:30,type:'MID',key:1,props:['high_crush','low_crush']},
+      {name:'d+3',input:'d+3',startup:13,ob:'-10',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'f+1,2',input:'f+1,2',startup:14,ob:'-3',oh:'+8',onCH:'+8',dmg:26,type:'MID',props:['linear']},
+      {name:'1,2,1',input:'1,2,1',startup:10,ob:'-6',oh:'+8',onCH:'+8',dmg:30,type:'HIGH',props:[]},
+    ],
+    dangerMoves:[
+      {name:'df+1,2',input:'df+1,2',ob:'-1',oh:'+10',why:'-1 on block — safe. He loops this as a frame trap. Jab only after.'},
+      {name:'fc,df+2',input:'fc,df+2',ob:'+3',oh:'Launch',why:'+3 on block FC launcher. Don\'t give him free crouch setups.'},
+      {name:'uf+3,4',input:'uf+3,4',ob:'-13',oh:'Launch',why:'High crush jump launcher. Don\'t use highs when he\'s hopping.'},
+    ],
+  },
+  {
+    id:'deviljin', name:'Devil Jin', short:'DJ', tier:'S', style:'Mishima / Devil', difficulty:'Hard',
+    origin:'Japan', role:['aggressive','poke'],
+    desc:'Mishima Karate with devil powers added. More range tools than Kazuya and a unique laser move. Top tier.',
+    moves:[
+      {name:'Electric WGF',input:'f,N,d,df+2',startup:13,ob:'+5',oh:'Launch',onCH:'Launch',dmg:32,type:'MID',key:1,props:['high_crush']},
+      {name:"Heaven's Door",input:'f+3,4',startup:15,ob:'-14',oh:'Launch',onCH:'Launch',dmg:38,type:'MID',key:1,props:['natural_combo']},
+      {name:'Devil Beam',input:'3+4,2',startup:18,ob:'-5',oh:'+8',onCH:'+8',dmg:22,type:'MID',key:1,props:['homing']},
+      {name:'f+1+2',input:'f+1+2',startup:16,ob:'-6',oh:'Launch',onCH:'Launch',dmg:26,type:'MID',key:1,props:[]},
+      {name:'df+1,2',input:'df+1,2',startup:13,ob:'-3',oh:'+8',onCH:'+8',dmg:24,type:'MID',props:['tracking']},
+      {name:'d+4',input:'d+4',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'d+3+4',input:'d+3+4',startup:20,ob:'-18',oh:'KND',onCH:'KND',dmg:22,type:'LOW',key:1,props:[]},
+      {name:'ws+2',input:'ws+2',startup:14,ob:'-1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'Electric WGF',input:'f,N,d,df+2',ob:'+5',oh:'Launch',why:'+5 on block and launches on hit. Same threat as Kazuya.'},
+      {name:"Heaven's Door",input:'f+3,4',ob:'-14',oh:'Launch',why:'-14 on block — launch every time.'},
+      {name:'f+1+2',input:'f+1+2',ob:'-6',oh:'Launch',why:'Devil punch launcher. -6 on block — punish with fastest string.'},
+    ],
+  },
+  {
+    id:'heihachi', name:'Heihachi Mishima', short:'HH', tier:'S', style:'Mishima Karate', difficulty:'Hard',
+    origin:'Japan', role:['aggressive','mixup'],
+    desc:'The patriarch returns. All classic Mishima tools with a powerful throw game and crushing oki pressure.',
+    moves:[
+      {name:'Electric WGF',input:'f,N,d,df+2',startup:13,ob:'+5',oh:'Launch',onCH:'Launch',dmg:32,type:'MID',key:1,props:['high_crush']},
+      {name:'Thunder God Fist',input:'f,N,d,df+1',startup:16,ob:'-14',oh:'KND',onCH:'KND',dmg:35,type:'MID',key:1,props:['wall_splat']},
+      {name:'1,2,1',input:'1,2,1',startup:10,ob:'-6',oh:'Launch',onCH:'Launch',dmg:30,type:'HIGH',key:1,props:['tracking']},
+      {name:'df+1,2',input:'df+1,2',startup:13,ob:'-3',oh:'+8',onCH:'+8',dmg:24,type:'MID',props:['tracking']},
+      {name:'d+4',input:'d+4',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'d+3+4',input:'d+3+4',startup:20,ob:'-18',oh:'KND',onCH:'KND',dmg:22,type:'LOW',key:1,props:[]},
+      {name:'f+4',input:'f+4',startup:16,ob:'+2',oh:'+8',onCH:'+8',dmg:20,type:'MID',key:1,props:[]},
+      {name:'ws+2',input:'ws+2',startup:14,ob:'-1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'Giant Swing',input:'hcb,f+1+2',startup:12,ob:'—',oh:'KND',onCH:'KND',dmg:55,type:'THROW',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'Electric WGF',input:'f,N,d,df+2',ob:'+5',oh:'Launch',why:'+5 on block, launches on hit.'},
+      {name:'Thunder God Fist',input:'f,N,d,df+1',ob:'-14',oh:'KND',why:'-14 on block — full launch punish every time.'},
+      {name:'1,2,1',input:'1,2,1',ob:'-6',oh:'Launch',why:'Third hit is high — duck it for a ws launch.'},
+    ],
+  },
+  {
+    id:'lili', name:'Lili', short:'LL', tier:'A', style:'Street Fighting (Dance)', difficulty:'Medium',
+    origin:'Monaco', role:['aggressive','mixup'],
+    desc:'Elegant rushdown with excellent wall carry and a strong high/low game.',
+    moves:[
+      {name:'Rose Garden',input:'b+3',startup:16,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:['low_crush']},
+      {name:'Splendid Heel',input:'db+3,3',startup:18,ob:'-14',oh:'Combo',onCH:'Combo',dmg:30,type:'LOW',key:1,props:[]},
+      {name:'Matterhorn',input:'f,f+3',startup:20,ob:'+3',oh:'KND',onCH:'KND',dmg:26,type:'MID',key:1,props:['wall_splat']},
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'3,3',input:'3,3',startup:12,ob:'-9',oh:'+6',onCH:'+6',dmg:26,type:'HIGH',props:['tracking']},
+      {name:'d+3',input:'d+3',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'b+4',input:'b+4',startup:19,ob:'-12',oh:'KND',onCH:'KND',dmg:26,type:'MID',props:['linear']},
+      {name:'ws+4',input:'ws+4',startup:13,ob:'+0',oh:'KND',onCH:'KND',dmg:22,type:'MID',props:[]},
+      {name:'fc,df+3',input:'fc,df+3',startup:16,ob:'+0',oh:'Launch',onCH:'Launch',dmg:26,type:'MID',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'Splendid Heel',input:'db+3,3',ob:'-14',oh:'Combo',why:'Low starter into combo. -14 on block — launch every time.'},
+      {name:'Matterhorn',input:'f,f+3',ob:'+3',oh:'KND',why:'+3 on block. Don\'t push buttons — jab only.'},
+      {name:'Rose Garden',input:'b+3',ob:'+1',oh:'Launch',why:'Evasive safe launcher at +1. Very hard to contest cleanly.'},
+    ],
+  },
+  {
+    id:'asuka', name:'Asuka Kazama', short:'AS', tier:'B', style:'Kazama Style', difficulty:'Low',
+    origin:'Japan', role:['defensive'],
+    desc:'Defensive powerhouse built around her reversal. Excellent for players who want to react and punish.',
+    moves:[
+      {name:'Reversal',input:'b+1+3 / b+2+4',startup:0,ob:'—',oh:'Launch',onCH:'Launch',dmg:30,type:'SPEC',key:1,props:[]},
+      {name:'df+2',input:'df+2',startup:14,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'f+4',input:'f+4',startup:16,ob:'+0',oh:'KND',onCH:'KND',dmg:24,type:'MID',key:1,props:[]},
+      {name:'d+3,4',input:'d+3,4',startup:13,ob:'-14',oh:'KND',onCH:'KND',dmg:24,type:'LOW',key:1,props:[]},
+      {name:'f+1+2',input:'f+1+2',startup:16,ob:'+2',oh:'+10',onCH:'+10',dmg:24,type:'MID',key:1,props:[]},
+      {name:'b+1,2',input:'b+1,2',startup:16,ob:'-10',oh:'KND',onCH:'KND',dmg:30,type:'MID',props:['linear']},
+      {name:'2,1',input:'2,1',startup:10,ob:'-5',oh:'+7',onCH:'Launch',dmg:22,type:'HIGH',props:[]},
+      {name:'ws+2',input:'ws+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'Reversal',input:'b+1+3',ob:'—',oh:'Launch',why:'Counters highs and mids. Use lows and throws — these bypass it.'},
+      {name:'f+1+2',input:'f+1+2',ob:'+2',oh:'+10',why:'+10 on hit — creates frame traps and throw mixups.'},
+      {name:'d+3,4',input:'d+3,4',ob:'-14',oh:'KND',why:'Low knockdown. -14 on block — full launch.'},
+    ],
+  },
+  {
+    id:'leroy', name:'Leroy Smith', short:'LR', tier:'A', style:'Wing Chun', difficulty:'Medium',
+    origin:'USA', role:['aggressive','defensive'],
+    desc:'All-round character with excellent parries, a powerful cane, and solid defensive tools.',
+    moves:[
+      {name:'White Crane',input:'f+1+2',startup:16,ob:'+2',oh:'Launch',onCH:'Launch',dmg:28,type:'MID',key:1,props:[]},
+      {name:'Parry',input:'b+1+3',startup:0,ob:'—',oh:'—',onCH:'—',dmg:0,type:'SPEC',key:1,props:[]},
+      {name:'df+2',input:'df+2',startup:13,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'uf+1+2',input:'uf+1+2',startup:20,ob:'-14',oh:'Launch',onCH:'Launch',dmg:28,type:'MID',key:1,props:['high_crush','low_crush']},
+      {name:'df+1,2',input:'df+1,2',startup:12,ob:'-2',oh:'+8',onCH:'+8',dmg:24,type:'MID',props:[]},
+      {name:'d+4',input:'d+4',startup:14,ob:'-14',oh:'+0',onCH:'+0',dmg:14,type:'LOW',props:[]},
+      {name:'b+1,2',input:'b+1,2',startup:15,ob:'-11',oh:'+6',onCH:'+6',dmg:28,type:'MID',props:['linear']},
+      {name:'ws+1+2',input:'ws+1+2',startup:15,ob:'+2',oh:'KND',onCH:'KND',dmg:24,type:'MID',props:[]},
+    ],
+    dangerMoves:[
+      {name:'White Crane',input:'f+1+2',ob:'+2',oh:'Launch',why:'+2 on block and launches on hit. Don\'t push after blocking.'},
+      {name:'Parry',input:'b+1+3',ob:'—',oh:'—',why:'Parries highs and mids. Throw and low poke to bypass it.'},
+      {name:'uf+1+2',input:'uf+1+2',ob:'-14',oh:'Launch',why:'-14 on block — full launch punish.'},
+    ],
+  },
+  {
+    id:'yoshimitsu', name:'Yoshimitsu', short:'YO', tier:'B', style:'Manji Ninjutsu', difficulty:'Very Hard',
+    origin:'Japan', role:['mixup','defensive'],
+    desc:'The most unorthodox fighter in the game. Multiple stances, self-harm options, and a toolkit that confuses everyone.',
+    moves:[
+      {name:'Flash',input:'b+1',startup:14,ob:'-9',oh:'Launch',onCH:'Launch',dmg:26,type:'HIGH',key:1,props:[]},
+      {name:'Sword Stab',input:'1+4',startup:17,ob:'-12',oh:'KND',onCH:'KND',dmg:30,type:'MID',props:[]},
+      {name:'Indian Stance',input:'3+4',startup:0,ob:'—',oh:'—',onCH:'—',dmg:0,type:'SPEC',key:1,props:[],stanceReq:'IS'},
+      {name:'Flea Stance',input:'u+1+2',startup:0,ob:'—',oh:'—',onCH:'—',dmg:0,type:'SPEC',key:1,props:[],stanceReq:'FLE'},
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'df+1',input:'df+1',startup:13,ob:'-2',oh:'+8',onCH:'+8',dmg:16,type:'MID',props:[]},
+      {name:'d+3',input:'d+3',startup:14,ob:'-12',oh:'+1',onCH:'+1',dmg:14,type:'LOW',props:[]},
+      {name:'Suicide',input:'d+1+2 (IS)',startup:0,ob:'—',oh:'—',onCH:'—',dmg:0,type:'SPEC',key:1,props:[],stanceReq:'IS'},
+    ],
+    dangerMoves:[
+      {name:'Flash',input:'b+1',ob:'-9',oh:'Launch',why:'Deceptively fast launcher. Looks like a normal elbow.'},
+      {name:'Indian Stance',input:'3+4',ob:'—',oh:'—',why:'From IS he can attack unpredictably. Hit the stance with a mid.'},
+      {name:'Sword Stab',input:'1+4',ob:'-12',oh:'KND',why:'-12 on block. He accepts self-damage risk — exploit it.'},
+    ],
+  },
+  {
+    id:'claudio', name:'Claudio Serafino', short:'CL', tier:'A', style:'Sirius Exorcism Arts', difficulty:'Medium',
+    origin:'Italy', role:['poke','aggressive'],
+    desc:'Reliable and consistent. Excellent range on mids, solid launcher, and the Starburst buff state.',
+    moves:[
+      {name:'df+2',input:'df+2',startup:13,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'Starburst df+2',input:'df+2 (SB)',startup:13,ob:'+5',oh:'Launch',onCH:'Launch',dmg:30,type:'MID',key:1,props:[],stanceReq:'SB'},
+      {name:'f+1,2',input:'f+1,2',startup:14,ob:'-3',oh:'+8',onCH:'+8',dmg:26,type:'MID',key:1,props:['linear']},
+      {name:'Starburst',input:'b+1+2',startup:0,ob:'—',oh:'—',onCH:'—',dmg:0,type:'SPEC',key:1,props:[]},
+      {name:'df+1,2',input:'df+1,2',startup:13,ob:'-3',oh:'+8',onCH:'+8',dmg:24,type:'MID',props:['tracking']},
+      {name:'d+4',input:'d+4',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'b+2',input:'b+2',startup:16,ob:'-4',oh:'+6',onCH:'+6',dmg:22,type:'MID',props:['homing']},
+      {name:'ws+2',input:'ws+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'df+2',input:'df+2',ob:'+1',oh:'Launch',why:'Safe launcher. In Starburst becomes +5 on block.'},
+      {name:'Starburst',input:'b+1+2',ob:'—',oh:'—',why:'Transforms his df+2 to +5 on block. Apply pressure to prevent activation.'},
+      {name:'f+1,2',input:'f+1,2',ob:'-3',oh:'+8',why:'Long range safe mid. He pokes from far safely.'},
+    ],
+  },
+  {
+    id:'jack8', name:'Jack-8', short:'J8', tier:'A', style:'Military Cyborg', difficulty:'Medium',
+    origin:'Russia', role:['aggressive','grappler'],
+    desc:'Slow but devastating. Massive damage, powerful throws, and incredible wall game.',
+    moves:[
+      {name:'Giant Swing',input:'hcb,f+2',startup:12,ob:'—',oh:'KND',onCH:'KND',dmg:55,type:'THROW',key:1,props:[]},
+      {name:'Body Press',input:'uf+1+2',startup:22,ob:'-8',oh:'KND',onCH:'KND',dmg:35,type:'MID',key:1,props:['high_crush','low_crush']},
+      {name:'d+1+2',input:'d+1+2',startup:22,ob:'-18',oh:'KND',onCH:'KND',dmg:28,type:'LOW',key:1,props:[]},
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'df+1,2',input:'df+1,2',startup:13,ob:'-4',oh:'+8',onCH:'+8',dmg:26,type:'MID',props:[]},
+      {name:'b+1,2',input:'b+1,2',startup:16,ob:'-10',oh:'KND',onCH:'KND',dmg:30,type:'MID',props:['linear','wall_splat']},
+      {name:'ws+1',input:'ws+1',startup:14,ob:'+2',oh:'KND',onCH:'KND',dmg:22,type:'MID',props:[]},
+      {name:'ff+2',input:'ff+2',startup:20,ob:'-12',oh:'KND',onCH:'KND',dmg:32,type:'MID',props:['wall_splat']},
+    ],
+    dangerMoves:[
+      {name:'Giant Swing',input:'hcb,f+2',ob:'—',oh:'KND',why:'55 damage on 2 break. Keep range — he needs to walk into throw range.'},
+      {name:'Body Press',input:'uf+1+2',ob:'-8',oh:'KND',why:'High crush. Slow enough to react but punishes highs hard.'},
+      {name:'d+1+2',input:'d+1+2',ob:'-18',oh:'KND',why:'-18 on block — massive punish window. It\'s slow, react to it.'},
+    ],
+  },
+  {
+    id:'lars', name:'Lars Alexandersson', short:'LA', tier:'A', style:'Tekken Force Arts', difficulty:'Medium',
+    origin:'Sweden', role:['aggressive','poke'],
+    desc:'Dynamic character with excellent movement, strong Saver stance pressure.',
+    moves:[
+      {name:'Orbital Heel',input:'uf+4',startup:19,ob:'-10',oh:'Launch',onCH:'Launch',dmg:26,type:'MID',key:1,props:['high_crush','low_crush']},
+      {name:'SE 3',input:'SE 3',startup:15,ob:'+2',oh:'KND',onCH:'KND',dmg:22,type:'MID',key:1,props:[],stanceReq:'SE'},
+      {name:'SE 1+2',input:'SE 1+2',startup:18,ob:'-4',oh:'Launch',onCH:'Launch',dmg:26,type:'MID',key:1,props:[],stanceReq:'SE'},
+      {name:'SE 4',input:'SE 4',startup:18,ob:'-14',oh:'KND',onCH:'KND',dmg:20,type:'LOW',key:1,props:[],stanceReq:'SE'},
+      {name:'df+2',input:'df+2',startup:13,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'f+3',input:'f+3',startup:17,ob:'+1',oh:'+8',onCH:'+8',dmg:20,type:'MID',props:[]},
+      {name:'d+3',input:'d+3',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'db+3',input:'db+3',startup:18,ob:'-16',oh:'KND',onCH:'KND',dmg:20,type:'LOW',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'Orbital Heel',input:'uf+4',ob:'-10',oh:'Launch',why:'High crush launcher. -10 on block — punish. Watch if using highs.'},
+      {name:'SE 3',input:'SE 3',ob:'+2',oh:'KND',why:'+2 on block from Saver. He maintains his turn.'},
+      {name:'SE 1+2',input:'SE 1+2',ob:'-4',oh:'Launch',why:'Launcher from Saver. Interrupt Saver entry before he settles.'},
+    ],
+  },
+  {
+    id:'victor', name:'Victor Chevalier', short:'VI', tier:'A', style:'Savate / French Boxing', difficulty:'Medium',
+    origin:'France', role:['poke','defensive'],
+    desc:'Elegant kicks, excellent range, and spy gadget traps give him a unique stage-control game.',
+    moves:[
+      {name:'Savate Kick',input:'f+3',startup:17,ob:'+2',oh:'+8',onCH:'+8',dmg:22,type:'MID',key:1,props:['linear']},
+      {name:'df+2',input:'df+2',startup:13,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'ff+3',input:'ff+3',startup:19,ob:'+3',oh:'KND',onCH:'KND',dmg:26,type:'MID',key:1,props:['wall_splat']},
+      {name:'Gadget Trap',input:'b+1+2',startup:0,ob:'—',oh:'—',onCH:'—',dmg:0,type:'SPEC',key:1,props:[]},
+      {name:'df+1,2',input:'df+1,2',startup:13,ob:'-3',oh:'+8',onCH:'+8',dmg:24,type:'MID',props:[]},
+      {name:'d+3',input:'d+3',startup:13,ob:'-10',oh:'+2',onCH:'+2',dmg:12,type:'LOW',props:[]},
+      {name:'b+3,4',input:'b+3,4',startup:18,ob:'-11',oh:'KND',onCH:'KND',dmg:30,type:'MID',props:['linear']},
+    ],
+    dangerMoves:[
+      {name:'Savate Kick',input:'f+3',ob:'+2',oh:'+8',why:'+2 on block. Respect his turn after blocking.'},
+      {name:'ff+3',input:'ff+3',ob:'+3',oh:'KND',why:'+3 on block. He can frame trap from this.'},
+      {name:'Gadget Trap',input:'b+1+2',ob:'—',oh:'—',why:'Glowing trap on the ground — avoid walking into it.'},
+    ],
+  },
+  {
+    id:'azucena', name:'Azucena', short:'AZ', tier:'A', style:'Libre de Lucha', difficulty:'Medium',
+    origin:'Peru', role:['mixup','poke'],
+    desc:'Coffee Power buff transforms her threat level. Excellent approach game and mix.',
+    moves:[
+      {name:'Coffee Power',input:'b+1+2',startup:0,ob:'—',oh:'—',onCH:'—',dmg:0,type:'SPEC',key:1,props:[]},
+      {name:'CP df+2',input:'df+2 (CP)',startup:13,ob:'+5',oh:'Launch',onCH:'Launch',dmg:28,type:'MID',key:1,props:[],stanceReq:'CP'},
+      {name:'df+2',input:'df+2',startup:13,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'4,4',input:'4,4',startup:13,ob:'-8',oh:'+6',onCH:'+6',dmg:26,type:'HIGH',key:1,props:['tracking']},
+      {name:'b+3,4',input:'b+3,4',startup:16,ob:'-10',oh:'Combo',onCH:'Combo',dmg:30,type:'MID',key:1,props:['natural_combo']},
+      {name:'ff+3',input:'ff+3',startup:19,ob:'+3',oh:'KND',onCH:'KND',dmg:26,type:'MID',key:1,props:[]},
+      {name:'d+3',input:'d+3',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+    ],
+    dangerMoves:[
+      {name:'4,4',input:'4,4',ob:'-8',oh:'+6',why:'Both kicks are high — duck for a free WS launch.'},
+      {name:'Coffee Power',input:'b+1+2',ob:'—',oh:'—',why:'In CP her df+2 becomes +5. Pressure her to prevent activation.'},
+      {name:'ff+3',input:'ff+3',ob:'+3',oh:'KND',why:'+3 on block — approach anchor. Respect it.'},
+    ],
+  },
+  {
+    id:'kuma', name:'Kuma', short:'KU', tier:'B', style:'Kuma Shinken', difficulty:'Medium',
+    origin:'Japan', role:['mixup','grappler'],
+    desc:'Giant bear with surprising tricks, massive grabs, and excellent wall damage.',
+    moves:[
+      {name:'Bear Hug',input:'qcb+1+2',startup:12,ob:'—',oh:'KND',onCH:'KND',dmg:50,type:'THROW',key:1,props:[]},
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:24,type:'MID',key:1,props:[]},
+      {name:'ff+2',input:'ff+2',startup:22,ob:'-14',oh:'Launch',onCH:'Launch',dmg:32,type:'MID',key:1,props:[]},
+      {name:'d+1+2',input:'d+1+2',startup:20,ob:'-16',oh:'KND',onCH:'KND',dmg:24,type:'LOW',key:1,props:[]},
+      {name:'b+2',input:'b+2',startup:18,ob:'-8',oh:'KND',onCH:'KND',dmg:28,type:'MID',props:['linear']},
+      {name:'Salmon Hunter',input:'b+1+2',startup:20,ob:'-10',oh:'KND',onCH:'KND',dmg:30,type:'MID',props:[]},
+    ],
+    dangerMoves:[
+      {name:'Bear Hug',input:'qcb+1+2',ob:'—',oh:'KND',why:'Huge damage command throw. Keep range at all times.'},
+      {name:'ff+2',input:'ff+2',ob:'-14',oh:'Launch',why:'-14 on block — full launch. High reward on hit.'},
+    ],
+  },
+  {
+    id:'shaheen', name:'Shaheen', short:'SH', tier:'B', style:'Saudi Military Arts', difficulty:'Low',
+    origin:'Saudi Arabia', role:['poke','aggressive'],
+    desc:'Honest and straightforward. Reliable tools and consistent damage. Great for learning fundamentals.',
+    moves:[
+      {name:'df+2',input:'df+2',startup:13,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'f+4',input:'f+4',startup:16,ob:'+2',oh:'+8',onCH:'+8',dmg:20,type:'MID',key:1,props:[]},
+      {name:'df+1,2',input:'df+1,2',startup:13,ob:'-3',oh:'+8',onCH:'+8',dmg:24,type:'MID',props:['tracking']},
+      {name:'d+4',input:'d+4',startup:14,ob:'-14',oh:'+0',onCH:'+0',dmg:14,type:'LOW',key:1,props:[]},
+      {name:'db+3',input:'db+3',startup:18,ob:'-16',oh:'KND',onCH:'KND',dmg:20,type:'LOW',key:1,props:[]},
+      {name:'b+2,1',input:'b+2,1',startup:16,ob:'-10',oh:'KND',onCH:'KND',dmg:30,type:'MID',props:['linear']},
+      {name:'ws+2',input:'ws+2',startup:14,ob:'-1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'f+4',input:'f+4',ob:'+2',oh:'+8',why:'+2 on block. Respect after blocking.'},
+      {name:'db+3',input:'db+3',ob:'-16',oh:'KND',why:'Low knockdown. -16 on block — full launch.'},
+    ],
+  },
+  {
+    id:'leo', name:'Leo Kliesen', short:'LE', tier:'A', style:'Baji Quan', difficulty:'Medium',
+    origin:'Germany', role:['defensive','poke'],
+    desc:'Well-rounded defensive character with excellent poking and strong CH game.',
+    moves:[
+      {name:'df+2',input:'df+2',startup:14,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'b+2,1',input:'b+2,1',startup:16,ob:'-10',oh:'KND',onCH:'Launch',dmg:28,type:'MID',key:1,props:['linear']},
+      {name:'d+3,2',input:'d+3,2',startup:16,ob:'-12',oh:'Combo',onCH:'Combo',dmg:26,type:'LOW',key:1,props:[]},
+      {name:'KNK 2',input:'KNK 2',startup:14,ob:'-4',oh:'+8',onCH:'+8',dmg:20,type:'MID',key:1,props:[],stanceReq:'KNK'},
+      {name:'KNK d+4',input:'KNK d+4',startup:18,ob:'-14',oh:'KND',onCH:'KND',dmg:18,type:'LOW',key:1,props:[],stanceReq:'KNK'},
+      {name:'f+3,4',input:'f+3,4',startup:16,ob:'-12',oh:'KND',onCH:'KND',dmg:30,type:'MID',props:['linear']},
+      {name:'d+4',input:'d+4',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'ws+2',input:'ws+2',startup:14,ob:'-1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'d+3,2',input:'d+3,2',ob:'-12',oh:'Combo',why:'Low starter into combo. -12 on block — punish.'},
+      {name:'KNK d+4',input:'KNK d+4',ob:'-14',oh:'KND',why:'Low from KNK stance. -14 on block — full launch.'},
+      {name:'b+2,1',input:'b+2,1',ob:'-10',oh:'KND',why:'-10 on block. 10f punish.'},
+    ],
+  },
+  {
+    id:'alisa', name:'Alisa Bosconovitch', short:'AL', tier:'B', style:'Robo-Martial Arts', difficulty:'Medium',
+    origin:'Russia', role:['poke','aggressive'],
+    desc:'Mechanical fighter with detachable arms, chainsaw mode, and some of the best wall oki in the game.',
+    moves:[
+      {name:'df+2',input:'df+2',startup:13,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'Rocket Upper',input:'uf+1+2',startup:18,ob:'-14',oh:'Launch',onCH:'Launch',dmg:28,type:'MID',key:1,props:['high_crush','low_crush']},
+      {name:'df+1,2',input:'df+1,2',startup:12,ob:'-1',oh:'+10',onCH:'+10',dmg:26,type:'MID',key:1,props:['tracking']},
+      {name:'Chainsaw Mode',input:'b+1+2',startup:0,ob:'—',oh:'—',onCH:'—',dmg:0,type:'SPEC',key:1,props:[]},
+      {name:'CDS 1',input:'CDS 1',startup:14,ob:'-4',oh:'+8',onCH:'+8',dmg:20,type:'MID',props:[],stanceReq:'CDS'},
+      {name:'CDS 3',input:'CDS 3',startup:18,ob:'-16',oh:'KND',onCH:'KND',dmg:22,type:'LOW',key:1,props:[],stanceReq:'CDS'},
+      {name:'d+3',input:'d+3',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'b+2,1',input:'b+2,1',startup:16,ob:'-10',oh:'KND',onCH:'KND',dmg:30,type:'MID',props:['linear']},
+    ],
+    dangerMoves:[
+      {name:'Rocket Upper',input:'uf+1+2',ob:'-14',oh:'Launch',why:'High crush — don\'t use highs when she hops. -14 on block.'},
+      {name:'Chainsaw Mode',input:'b+1+2',ob:'—',oh:'—',why:'Arms floating with chainsaw sound — interrupt the transition.'},
+      {name:'CDS 3',input:'CDS 3',ob:'-16',oh:'KND',why:'Low from Chainsaw mode. -16 on block — full launch.'},
+    ],
+  },
+  {
+    id:'zafina', name:'Zafina', short:'ZA', tier:'B', style:'Ancient Assassination Arts', difficulty:'Very Hard',
+    origin:'Middle East', role:['mixup','defensive'],
+    desc:'Spider-like movement and deeply unorthodox stances. Knowledge matchup — learn the options.',
+    moves:[
+      {name:'TRT 1',input:'TRT 1',startup:16,ob:'-8',oh:'Launch',onCH:'Launch',dmg:26,type:'MID',key:1,props:[],stanceReq:'TRT'},
+      {name:'TRT 3',input:'TRT 3',startup:18,ob:'-16',oh:'KND',onCH:'KND',dmg:18,type:'LOW',key:1,props:[],stanceReq:'TRT'},
+      {name:'MNT 2',input:'MNT 2',startup:14,ob:'-6',oh:'+8',onCH:'+8',dmg:18,type:'MID',key:1,props:[],stanceReq:'MNT'},
+      {name:'MNT d+3',input:'MNT d+3',startup:18,ob:'-14',oh:'KND',onCH:'KND',dmg:20,type:'LOW',key:1,props:[],stanceReq:'MNT'},
+      {name:'Tarantula Stance',input:'3+4',startup:0,ob:'—',oh:'—',onCH:'—',dmg:0,type:'SPEC',key:1,props:[]},
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'d+4',input:'d+4',startup:14,ob:'-14',oh:'+0',onCH:'+0',dmg:12,type:'LOW',props:[]},
+    ],
+    dangerMoves:[
+      {name:'Tarantula Stance',input:'3+4',ob:'—',oh:'—',why:'Nearly on the floor. Hit with a mid immediately.'},
+      {name:'TRT 1',input:'TRT 1',ob:'-8',oh:'Launch',why:'Launcher from floor position. Hit the stance before it executes.'},
+      {name:'MNT d+3',input:'MNT d+3',ob:'-14',oh:'KND',why:'Low from Mantis. -14 on block — full launch.'},
+    ],
+  },
+  {
+    id:'raven', name:'Raven', short:'RV', tier:'A', style:'Ninjutsu', difficulty:'Hard',
+    origin:'Classified', role:['mixup','aggressive'],
+    desc:'Teleport pressure and clone games. Excellent evasion. Frustrating without matchup knowledge.',
+    moves:[
+      {name:'Shadow Step',input:'f,f+1+2',startup:0,ob:'—',oh:'—',onCH:'—',dmg:0,type:'SPEC',key:1,props:[]},
+      {name:'Ninja Blade',input:'b+2',startup:17,ob:'-4',oh:'+8',onCH:'Launch',dmg:26,type:'MID',key:1,props:['linear']},
+      {name:'df+2',input:'df+2',startup:13,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'df+1,2',input:'df+1,2',startup:13,ob:'-3',oh:'+8',onCH:'+8',dmg:24,type:'MID',props:[]},
+      {name:'d+4',input:'d+4',startup:14,ob:'-14',oh:'+0',onCH:'+0',dmg:14,type:'LOW',key:1,props:[]},
+      {name:'db+3',input:'db+3',startup:18,ob:'-16',oh:'KND',onCH:'KND',dmg:20,type:'LOW',key:1,props:[]},
+      {name:'Clone Summon',input:'b+3+4',startup:0,ob:'—',oh:'—',onCH:'—',dmg:0,type:'SPEC',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'Shadow Step',input:'f,f+1+2',ob:'—',oh:'—',why:'Teleport bait. Don\'t mash after — wait for landing and punish.'},
+      {name:'Ninja Blade',input:'b+2',ob:'-4',oh:'+8',why:'-4 on block but CH launches. His pressure anchor.'},
+      {name:'db+3',input:'db+3',ob:'-16',oh:'KND',why:'Low knockdown. -16 on block — full launch.'},
+    ],
+  },
+  {
+    id:'clive', name:'Clive Rosfield', short:'CV', tier:'A', style:'FF16 Combat Arts', difficulty:'Medium',
+    origin:'Valisthea (Guest)', role:['aggressive','poke'],
+    desc:'Guest character from Final Fantasy XVI. Fire-based attacks and Phoenix energy give him unique tools.',
+    moves:[
+      {name:'df+2',input:'df+2',startup:13,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'Burning Blade',input:'f+2,1',startup:14,ob:'-8',oh:'KND',onCH:'KND',dmg:30,type:'MID',key:1,props:['wall_splat']},
+      {name:'Scarlet Cyclone',input:'qcf+1+2',startup:18,ob:'-12',oh:'Launch',onCH:'Launch',dmg:28,type:'MID',key:1,props:['low_crush']},
+      {name:'Limit Break',input:'qcf+1',startup:20,ob:'-12',oh:'Launch',onCH:'Launch',dmg:34,type:'MID',key:1,props:[]},
+      {name:'Phoenix Shift',input:'f+1+2',startup:18,ob:'-8',oh:'+8',onCH:'+8',dmg:24,type:'MID',props:[]},
+      {name:'Ifrit Strike',input:'b+1+2',startup:20,ob:'-10',oh:'KND',onCH:'KND',dmg:32,type:'MID',props:['power_crush']},
+      {name:'d+3',input:'d+3',startup:13,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+    ],
+    dangerMoves:[
+      {name:'Scarlet Cyclone',input:'qcf+1+2',ob:'-12',oh:'Launch',why:'Evasive launcher. -12 on block — punish.'},
+      {name:'Burning Blade',input:'f+2,1',ob:'-8',oh:'KND',why:'-8 on block and wall carries.'},
+      {name:'Limit Break',input:'qcf+1',ob:'-12',oh:'Launch',why:'His second launcher — same punish window as Scarlet Cyclone.'},
+    ],
+  },
+  // ── DLC / MISSING CHARACTERS (placeholder data) ────────────────
+  {
+    id:'eddy', name:'Eddy Gordo', short:'ED', tier:'B', style:'Capoeira', difficulty:'Hard',
+    origin:'Brazil', role:['mixup','aggressive'],
+    desc:'Capoeira movement makes his strings look random — they\'re not. SWR beats most of the evasive movement. His low game from floor positions is dangerous.',
+    moves:[
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'d+4',input:'d+4',startup:14,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+      {name:'ws+3',input:'ws+3',startup:13,ob:'+0',oh:'+6',onCH:'+6',dmg:16,type:'MID',props:[]},
+    ],
+    dangerMoves:[
+      {name:'df+2',input:'df+2',ob:'+0',oh:'Launch',why:'His primary launcher. Safe on block.'},
+    ],
+  },
+  {
+    id:'fahkumram', name:'Fahkumram', short:'FK', tier:'A', style:'Muay Thai', difficulty:'Medium',
+    origin:'Thailand', role:['aggressive'],
+    desc:'Muay Thai powerhouse with enormous kick range. His linear offense means sidestep is very effective. High damage ceiling on punishes.',
+    moves:[
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'d+4',input:'d+4',startup:14,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+    ],
+    dangerMoves:[
+      {name:'df+2',input:'df+2',ob:'+0',oh:'Launch',why:'Primary launcher. Data pending CSV import.'},
+    ],
+  },
+  {
+    id:'jun', name:'Jun Kazama', short:'JU', tier:'A', style:'Kazama Style', difficulty:'Medium',
+    origin:'Japan', role:['defensive','mixup'],
+    desc:'Defensive style with Kazama reversals. Similar to Asuka but with more offensive tools. Low poke and throw to bypass her counter game.',
+    moves:[
+      {name:'df+2',input:'df+2',startup:14,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'Reversal',input:'b+1+3 / b+2+4',startup:0,ob:'—',oh:'Launch',onCH:'Launch',dmg:30,type:'SPEC',key:1,props:[]},
+      {name:'d+3,4',input:'d+3,4',startup:13,ob:'-14',oh:'KND',onCH:'KND',dmg:24,type:'LOW',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'Reversal',input:'b+1+3',ob:'—',oh:'Launch',why:'Counters highs and mids. Use lows and throws to bypass.'},
+    ],
+  },
+  {
+    id:'lee', name:'Lee Chaolan', short:'LC', tier:'A', style:'Martial Arts (Infinite Azure)', difficulty:'Hard',
+    origin:'Japan', role:['poke','aggressive'],
+    desc:'Infinite Azure pressure strings. His mids are safe and plus. Sidestep left beats most of his linear kicks.',
+    moves:[
+      {name:'df+2',input:'df+2',startup:13,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'Infinite Azure',input:'4,4,4...',startup:13,ob:'-13',oh:'+6',onCH:'+6',dmg:15,type:'HIGH',key:1,props:['tracking']},
+      {name:'d+4',input:'d+4',startup:14,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+    ],
+    dangerMoves:[
+      {name:'Infinite Azure',input:'4,4,4',ob:'-13',oh:'+6',why:'Long kick string — duck any hit for a WS punish.'},
+    ],
+  },
+  {
+    id:'lidia', name:'Lidia Sobieska', short:'LI', tier:'A', style:'Polish Karate', difficulty:'Hard',
+    origin:'Poland', role:['aggressive','poke'],
+    desc:'Stance-based Polish martial arts. Her moves gain properties based on her current breathing state. Interrupt stance transitions with fast mids.',
+    moves:[
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'d+4',input:'d+4',startup:14,ob:'-12',oh:'+1',onCH:'+1',dmg:12,type:'LOW',props:[]},
+    ],
+    dangerMoves:[
+      {name:'df+2',input:'df+2',ob:'+0',oh:'Launch',why:'Primary launcher. Data pending CSV import.'},
+    ],
+  },
+  {
+    id:'miaryzo', name:'Miary Zo', short:'MZ', tier:'B', style:'Savika', difficulty:'Medium',
+    origin:'Madagascar', role:['aggressive'],
+    desc:'New character — full data pending CSV import.',
+    moves:[
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'df+2',input:'df+2',ob:'+0',oh:'Launch',why:'Primary launcher. Data pending CSV import.'},
+    ],
+  },
+  {
+    id:'panda', name:'Panda', short:'PA', tier:'B', style:'Kuma Shinken', difficulty:'Medium',
+    origin:'Japan', role:['mixup','grappler'],
+    desc:'Kuma\'s counterpart — same general gameplan. Slow and powerful. Keep center stage, backdash, and punish committed moves.',
+    moves:[
+      {name:'Bear Hug',input:'qcb+1+2',startup:12,ob:'—',oh:'KND',onCH:'KND',dmg:50,type:'THROW',key:1,props:[]},
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:24,type:'MID',key:1,props:[]},
+      {name:'ff+2',input:'ff+2',startup:22,ob:'-14',oh:'Launch',onCH:'Launch',dmg:32,type:'MID',key:1,props:[]},
+      {name:'d+1+2',input:'d+1+2',startup:20,ob:'-16',oh:'KND',onCH:'KND',dmg:24,type:'LOW',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'Bear Hug',input:'qcb+1+2',ob:'—',oh:'KND',why:'Huge damage command throw. Stay out of throw range.'},
+      {name:'ff+2',input:'ff+2',ob:'-14',oh:'Launch',why:'-14 on block — full launch.'},
+    ],
+  },
+  {
+    id:'anna', name:'Anna Williams', short:'AN', tier:'A', style:'Assassination Arts', difficulty:'Hard',
+    origin:'Ireland', role:['poke','mixup'],
+    desc:'Nina\'s sister with a similar toolkit. Excellent throw game. df+4 at +1 is her core poke. Very similar matchup knowledge to Nina.',
+    moves:[
+      {name:'df+2',input:'df+2',startup:13,ob:'+1',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'df+4',input:'df+4',startup:13,ob:'+1',oh:'+8',onCH:'+8',dmg:15,type:'MID',key:1,props:['tracking']},
+      {name:'d+3',input:'d+3',startup:12,ob:'-10',oh:'+2',onCH:'+2',dmg:12,type:'LOW',props:[]},
+      {name:'Multi Throw',input:'2+4',startup:13,ob:'—',oh:'KND',onCH:'KND',dmg:60,type:'THROW',key:1,props:[]},
+    ],
+    dangerMoves:[
+      {name:'df+4',input:'df+4',ob:'+1',oh:'+8',why:'+1 on block — same as Nina. She loops this.'},
+      {name:'Multi Throw',input:'2+4',ob:'—',oh:'KND',why:'Chain throw. Break or take huge damage.'},
+    ],
+  },
+  {
+    id:'armorking', name:'Armor King', short:'AK', tier:'A', style:'Pro Wrestling', difficulty:'Medium',
+    origin:'Mexico', role:['mixup','grappler'],
+    desc:'King variant with darker mix. Similar throw game but different normals. Break Giant Swing with 2.',
+    moves:[
+      {name:'Giant Swing',input:'hcb,f+2',startup:12,ob:'—',oh:'KND',onCH:'KND',dmg:65,type:'THROW',key:1,props:[]},
+      {name:'df+2',input:'df+2',startup:14,ob:'+0',oh:'Launch',onCH:'Launch',dmg:22,type:'MID',key:1,props:[]},
+      {name:'Low Shot',input:'db+4',startup:17,ob:'-15',oh:'KND',onCH:'KND',dmg:20,type:'LOW',key:1,props:[]},
+      {name:'b+1,2',input:'b+1,2',startup:15,ob:'-11',oh:'KND',onCH:'KND',dmg:30,type:'MID',props:[]},
+    ],
+    dangerMoves:[
+      {name:'Giant Swing',input:'hcb,f+2',ob:'—',oh:'KND',why:'65 damage on 2 break. Keep range at all times.'},
+      {name:'Low Shot',input:'db+4',ob:'-15',oh:'KND',why:'-15 on block — full launch punish.'},
+    ],
+  },
+];
+
+// ================================================================
+// CSV IMPORTER
+// ================================================================
+
+// Maps each character ID to its CSV file path inside the /data/ folder
+const CHAR_FILE_MAP = {
+  'kazuya':     'kazuya/kazuya-special.csv',
+  'jin':        'jin/jin-special.csv',
+  'nina':       'nina/nina-special.csv',
+  'paul':       'paul/paul-special.csv',
+  'law':        'law/law-special.csv',
+  'king':       'king/king-special.csv',
+  'xiaoyu':     'xiaoyu/xiaoyu-special.csv',
+  'hwoarang':   'hwoarang/hwoarang-special.csv',
+  'dragunov':   'dragunov/dragunov-special.csv',
+  'reina':      'reina/reina-special.csv',
+  'feng':       'feng/feng-special.csv',
+  'deviljin':   'devil-jin/devil-jin-special.csv',
+  'heihachi':   'heihachi/heihachi-special.csv',
+  'lili':       'lili/lili-special.csv',
+  'asuka':      'asuka/asuka-special.csv',
+  'steve':      'steve/steve-special.csv',
+  'leroy':      'leroy/leroy-special.csv',
+  'yoshimitsu': 'yoshimitsu/yoshimitsu-special.csv',
+  'claudio':    'claudio/claudio-special.csv',
+  'jack8':      'jack-8/jack-8-special.csv',
+  'lars':       'lars/lars-special.csv',
+  'victor':     'victor/victor-special.csv',
+  'azucena':    'azucena/azucena-special.csv',
+  'kuma':       'kuma/kuma-special.csv',
+  'shaheen':    'shaheen/shaheen-special.csv',
+  'leo':        'leo/leo-special.csv',
+  'alisa':      'alisa/alisa-special.csv',
+  'zafina':     'zafina/zafina-special.csv',
+  'raven':      'raven/raven-special.csv',
+  'clive':      'clive/clive-special.csv',
+  'bryan':      'bryan/bryan-special.csv',
+  'eddy':       'eddy/eddy-special.csv',
+  'fahkumram':  'fahkumram/fahkumram-special.csv',
+  'jun':        'jun/jun-special.csv',
+  'lee':        'lee/lee-special.csv',
+  'lidia':      'lidia/lidia-special.csv',
+  'miaryzo':    'miary-zo/miary-zo-special.csv',
+  'panda':      'panda/panda-special.csv',
+  'anna':       'anna/anna-special.csv',
+  'armorking':  'armor-king/armor-king-special.csv',
+};
+
+// Tag → property label mapping from Wavu CSV format
+const TAG_LABELS = {
+  'hom':  'Homing',
+  'bbr':  'Balcony Brk',
+  'fbr':  'Floor Brk',
+  'spk':  'Spike',
+  'trn':  'Tornado',
+  'he':   'Heat Engager',
+  'hs':   'Heat Smash',
+  'hb':   'Heat Burst',
+  'rbr':  'Reversal Brk',
+  'elb':  'Elbow',
+  'kne':  'Knee',
+  'wpn':  'Weapon',
+};
+
+// Parse crush/jump/float frame tags like pc7~16, js6~22, cs1~25
+function parseCrushTag(tag) {
+  const pcMatch = tag.match(/^pc(\d+~\d*)/);
+  if (pcMatch) return { type: 'pc', frames: pcMatch[1] };
+  const csMatch = tag.match(/^cs(\d+~\d*)/);
+  if (csMatch) return { type: 'cs', frames: csMatch[1] };
+  const jsMatch = tag.match(/^js(\d+~\d*)/);
+  if (jsMatch) return { type: 'js', frames: jsMatch[1] };
+  return null;
+}
+
+// Normalize hit level from CSV to app type
+function normalizeHitLevel(raw) {
+  if (!raw) return 'MID';
+  const first = raw.trim().split(/[,\s]/)[0].toUpperCase();
+  if (first === 'H' || first === 'H!') return 'HIGH';
+  if (first === 'L') return 'LOW';
+  if (first === 'M') return 'MID';
+  if (first === 'T') return 'THROW';
+  if (raw.toLowerCase().includes('th')) return 'THROW';
+  return 'MID';
+}
+
+// Parse startup frames — strip 'i' prefix, handle ranges like i13~14, take first number
+function parseStartup(raw) {
+  if (!raw) return null;
+  const cleaned = raw.trim().split(',')[0].trim(); // take first hit only
+  const match = cleaned.match(/i(\d+)/);
+  return match ? parseInt(match[1]) : null;
+}
+
+// Parse damage — handle arrays like "[12;12]" and ranges, return total
+function parseDamage(raw) {
+  if (!raw) return null;
+  // Remove brackets
+  const cleaned = raw.replace(/[\[\]]/g, '').trim();
+  // Sum all numbers for total damage
+  const nums = cleaned.split(/[;,\s]+/).map(n => parseInt(n)).filter(n => !isNaN(n));
+  return nums.length ? nums.reduce((a, b) => a + b, 0) : null;
+}
+
+// Parse frame advantage — keep as-is but clean up
+function parseFrameVal(raw) {
+  if (!raw || !raw.trim()) return null;
+  const cleaned = raw.trim();
+  // Handle values like "+5 LNH", "+37a (+29)", "-12~-11" — take first meaningful value
+  const match = cleaned.match(/^([+-]?\d+)/);
+  if (match) return match[1].startsWith('+') || match[1].startsWith('-')
+    ? match[1]
+    : (parseInt(match[1]) >= 0 ? '+' + match[1] : match[1]);
+  if (cleaned.toLowerCase().includes('launch') || cleaned.match(/\+\d+[ad]/)) return 'Launch';
+  if (cleaned.toLowerCase().includes('knd') || cleaned.match(/\+\d+[d]/i)) return 'KND';
+  return cleaned.split(/[\s(]/)[0]; // take first token
+}
+
+// Parse tags column into structured props array and crush info
+function parseTags(raw, notes) {
+  const props = [];
+  const crushInfo = [];
+  if (!raw) return { props, crushInfo };
+
+  const tokens = raw.trim().split(/\s+/);
+  for (const token of tokens) {
+    if (TAG_LABELS[token]) {
+      props.push(token);
+    } else {
+      const crush = parseCrushTag(token);
+      if (crush) crushInfo.push(crush);
+    }
+  }
+
+  // Also scan notes for additional properties
+  if (notes) {
+    if (notes.includes('Homing') && !props.includes('hom')) props.push('hom');
+    if (notes.includes('Tornado') && !props.includes('trn')) props.push('trn');
+    if (notes.includes('Balcony Break') && !props.includes('bbr')) props.push('bbr');
+    if (notes.includes('Floor Break') && !props.includes('fbr')) props.push('fbr');
+  }
+
+  return { props, crushInfo };
+}
+
+// Determine if a move is a "key" move based on its properties
+function isKeyMove(move) {
+  if (move.type === 'THROW') return true;
+  if (move.oh === 'Launch') return true;
+  if (move.type === 'LOW' && move.startup <= 20) return true;
+  if (move.props && (move.props.includes('he') || move.props.includes('hs'))) return true;
+  const ob = parseInt(move.ob);
+  if (!isNaN(ob) && ob >= 3) return true;
+  return false;
+}
+
+// Parse a full CSV text into an array of move objects
+function parseCSV(text, charId) {
+  // Use proper CSV parsing that handles quoted multiline fields
+  const rows = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === '\n' && !inQuotes) {
+      rows.push(current);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  if (current.trim()) rows.push(current);
+
+  if (rows.length < 2) return [];
+
+  const moves = [];
+
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row.trim()) continue;
+
+    // Split by semicolon respecting the already-unquoted content
+    const cols = row.split(';');
+    if (cols.length < 12) continue;
+
+    const command    = cols[0].trim();
+    const hitLevel   = cols[1].trim();
+    const damageRaw  = cols[2].trim();
+    const startupRaw = cols[3].trim();
+    const blockRaw   = cols[4].trim();
+    const hitRaw     = cols[5].trim();
+    const chRaw      = cols[6].trim();
+    const notes      = cols[7].trim();
+    const tagsRaw    = cols[8].trim();
+    const transitions= cols[9].trim();
+    // col 10 = wavu id
+    const moveName   = cols[11] ? cols[11].trim() : '';
+    const recovery   = cols[12] ? cols[12].trim() : '';
+
+    if (!command) continue;
+
+    const startup = parseStartup(startupRaw);
+    const damage  = parseDamage(damageRaw);
+    const ob      = parseFrameVal(blockRaw);
+    const oh      = parseFrameVal(hitRaw);
+    const onCH    = parseFrameVal(chRaw);
+    const type    = normalizeHitLevel(hitLevel);
+    const { props, crushInfo } = parseTags(tagsRaw, notes);
+
+    // Parse stance requirement from command prefix (e.g. DES.f+2 → DES)
+    const stanceMatch = command.match(/^([A-Z][A-Z0-9]+)\./);
+    const stanceReq = stanceMatch ? stanceMatch[1] :
+                      (transitions ? transitions.split(',')[0].trim() : null);
+
+    const move = {
+      name:       moveName || command,
+      input:      command,
+      startup,
+      ob,
+      oh,
+      onCH,
+      dmg:        damage,
+      type,
+      props,
+      crushInfo,
+      stanceReq:  stanceReq || null,
+      recovery:   recovery || null,
+      notes:      notes || null,
+      transitions: transitions ? transitions.split(',').map(t => t.trim()).filter(Boolean) : [],
+    };
+
+    move.key = isKeyMove(move) ? 1 : 0;
+
+    moves.push(move);
+  }
+
+  return moves;
+}
+
+// Fetch and load a single character's CSV
+const CSV_CACHE = {};
+
+async function loadCharCSV(charId) {
+  if (CSV_CACHE[charId]) return CSV_CACHE[charId];
+
+  const filePath = CHAR_FILE_MAP[charId];
+  if (!filePath) return null;
+
+  try {
+    const res = await fetch(`data/${filePath}`);
+    if (!res.ok) return null;
+    const text = await res.text();
+    const moves = parseCSV(text, charId);
+    CSV_CACHE[charId] = moves;
+    return moves;
+  } catch (e) {
+    console.warn(`Could not load CSV for ${charId}:`, e);
+    return null;
+  }
+}
+
+// Load CSV moves for a character and inject into CHARS array
+async function hydrateChar(charId) {
+  const char = CHARS.find(c => c.id === charId);
+  if (!char) return;
+  if (char._hydrated) return; // already loaded
+
+  const moves = await loadCharCSV(charId);
+  if (moves && moves.length > 0) {
+    char.moves = moves;
+    char._hydrated = true;
+    char._moveCount = moves.length;
+  }
+}
+
+// Preload all characters in the background (non-blocking)
+async function preloadAllChars() {
+  for (const char of CHARS) {
+    // Small delay between fetches to avoid hammering
+    await hydrateChar(char.id);
+    await new Promise(r => setTimeout(r, 20));
+  }
+  console.log('T8 Scout: All character data loaded');
+}
+
+// ================================================================
+// STATE
+// ================================================================
+const state = {
+  activeTab: 'home',
+  myChar: localStorage.getItem('t8s_mychar') || null,
+  scoutChar: null,
+  dbChar: null,
+  dbFilter: 'all',
+  dbSearch: '',
+  dbSort: null,
+  cmpA: null,
+  cmpB: null,
+  cmpFilter: 'all',
+  cmpPickSide: null,
+  expandedMove: null,
+  onboardSelected: null,
+};
+
+function setMyChar(id) {
+  state.myChar = id;
+  localStorage.setItem('t8s_mychar', id);
+  renderHeaderChar();
+  renderHomeTab();
+}
+
+// ================================================================
+// ONBOARDING
+// ================================================================
+function showOnboarding() {
+  document.getElementById('onboarding').style.display = 'flex';
+  renderOnboardGrid('');
+}
+
+function hideOnboarding() {
+  document.getElementById('onboarding').style.display = 'none';
+}
+
+function renderOnboardGrid(search) {
+  const grid = document.getElementById('onboard-char-grid');
+  const filtered = CHARS.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    c.short.toLowerCase().includes(search.toLowerCase())
+  );
+  grid.innerHTML = filtered.map(c => {
+    const sel = state.onboardSelected === c.id ? 'onboard-selected' : '';
+    return `
+      <div class="char-tile ${sel}" onclick="selectOnboardChar('${c.id}')">
+        <div class="char-tile-tier tier-${c.tier}">${c.tier}</div>
+        <div class="char-tile-short">${c.short}</div>
+        <div class="char-tile-name">${c.name.split(' ')[0]}</div>
+      </div>`;
+  }).join('');
+}
+
+function selectOnboardChar(id) {
+  state.onboardSelected = id;
+  const c = getChar(id);
+  document.getElementById('onboarding-selected-label').textContent = c ? c.name : id;
+  document.getElementById('onboarding-confirm').disabled = false;
+  renderOnboardGrid(document.getElementById('onboard-search').value);
+}
+
+function confirmOnboarding() {
+  if (!state.onboardSelected) return;
+  setMyChar(state.onboardSelected);
+  hideOnboarding();
+  // Hydrate their character immediately
+  hydrateChar(state.myChar).then(() => renderHomeTab());
+}
+
+// ================================================================
+// CHARACTER SWITCHER
+// ================================================================
+function openSwitcher() {
+  document.getElementById('char-switcher').style.display = 'flex';
+  document.getElementById('switcher-search').value = '';
+  renderSwitcherGrid('');
+  // Focus search after animation
+  setTimeout(() => document.getElementById('switcher-search').focus(), 200);
+}
+
+function closeSwitcherDirect() {
+  document.getElementById('char-switcher').style.display = 'none';
+}
+
+function closeSwitcher(e) {
+  // Close if clicking the backdrop (not the inner panel)
+  if (e.target === document.getElementById('char-switcher')) {
+    closeSwitcherDirect();
+  }
+}
+
+function renderSwitcherGrid(search) {
+  const grid = document.getElementById('switcher-char-grid');
+  const filtered = CHARS.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    c.short.toLowerCase().includes(search.toLowerCase())
+  );
+  grid.innerHTML = filtered.map(c => {
+    const active = state.myChar === c.id ? 'active' : '';
+    return `
+      <div class="char-tile ${active}" onclick="selectSwitcherChar('${c.id}')">
+        <div class="char-tile-tier tier-${c.tier}">${c.tier}</div>
+        <div class="char-tile-short">${c.short}</div>
+        <div class="char-tile-name">${c.name.split(' ')[0]}</div>
+      </div>`;
+  }).join('');
+}
+
+async function selectSwitcherChar(id) {
+  setMyChar(id);
+  closeSwitcherDirect();
+  await hydrateChar(id);
+  renderHomeTab();
+}
+
+// ================================================================
+// HEADER
+// ================================================================
+function renderHeaderChar() {
+  const c = getChar(state.myChar);
+  const nameEl = document.getElementById('mychar-btn-name');
+  if (c) {
+    nameEl.textContent = c.name;
+  } else {
+    nameEl.textContent = 'Set character';
+  }
+}
+
+// ================================================================
+// HELPERS
+// ================================================================
+function getChar(id) { return CHARS.find(c => c.id === id); }
+function getMeta(id) { return MATCHUP_META[id] || {ss:'N', threat:3, summary:'Data coming soon.'}; }
+
+// Get punish options for myChar against a given frame window
+function getPunishes(window) {
+  const myC = getChar(state.myChar);
+  if (!myC) return [];
+  const w = parseInt(window);
+  if (isNaN(w) || w >= 0) return [];
+  const absW = Math.abs(w);
+  return myC.moves
+    .filter(m => m.startup <= absW && m.type !== 'SPEC' && m.type !== 'THROW')
+    .sort((a,b) => b.dmg - a.dmg)
+    .slice(0, 4)
+    .map(m => ({
+      name: m.name,
+      input: m.input,
+      startup: m.startup,
+      dmg: m.dmg,
+      type: m.type,
+      punishType: m.input && (m.input.includes('ws') || m.input.startsWith('ws')) ? 'WS' :
+                  m.input && (m.input.includes('fc') || m.input.includes('FC')) ? 'FC' : 'STD',
+      difficulty: calcDifficulty(m.input, m.type),
+    }));
+}
+
+function threatColor(t) {
+  if (t <= 1) return 'var(--green)';
+  if (t <= 2) return 'var(--green)';
+  if (t <= 3) return 'var(--yellow)';
+  if (t <= 4) return 'var(--orange)';
+  return 'var(--red)';
+}
+
+function threatLabel(t) {
+  return ['','Very Low','Low','Medium','High','Extreme'][t] || 'Unknown';
+}
+
+function ssLabel(ss) {
+  if (ss === 'L') return {text:'Sidestep LEFT', cls:'ss-left'};
+  if (ss === 'R') return {text:'Sidestep RIGHT', cls:'ss-right'};
+  return {text:'Either / Neutral', cls:'ss-either'};
+}
+
+function renderProps(props) {
+  if (!props || !props.length) return '';
+  // Handle both old format (tracking, homing, etc.) and new Wavu CSV format (hom, bbr, etc.)
+  const map = {
+    // Old format
+    tracking:'TRACKING', homing:'HOMING', linear:'LINEAR',
+    high_crush:'HIGH CRUSH', low_crush:'LOW CRUSH', power_crush:'PWR CRUSH',
+    wall_splat:'WALL SPLAT', wall_bounce:'WALL BOUNCE',
+    tailspin:'TAILSPIN', natural_combo:'NAT. COMBO',
+    // New Wavu CSV format
+    hom:'HOMING', bbr:'BALCONY BRK', fbr:'FLOOR BRK',
+    spk:'SPIKE', trn:'TORNADO', he:'HEAT ENGAGER',
+    hs:'HEAT SMASH', hb:'HEAT BURST', rbr:'REVERSAL BRK',
+    elb:'ELBOW', kne:'KNEE', wpn:'WEAPON',
+  };
+  const cls = {
+    tracking:'tracking', homing:'homing', hom:'homing',
+    linear:'', high_crush:'crush', low_crush:'crush', power_crush:'pc',
+    wall_splat:'splat', wall_bounce:'splat',
+    bbr:'splat', fbr:'splat', spk:'splat',
+    trn:'key', he:'key', hs:'key', hb:'key',
+    natural_combo:'key', rbr:'',
+    elb:'', kne:'', wpn:'',
+  };
+  return props.map(p =>
+    `<span class="prop-tag ${cls[p]||''}">${map[p]||p.toUpperCase()}</span>`
+  ).join('');
+}
+
+// ================================================================
+// RENDER: MY CHAR PILLS
+// ================================================================
+function renderMyCharPills() {
+  // Replaced by renderHeaderChar() — kept as no-op to avoid errors
+  renderHeaderChar();
+}
+
+// ================================================================
+// RENDER: HOME TAB
+// ================================================================
+function renderHomeTab() {
+  // Home tab is now just the opponent character grid — tap to scout
+  renderCharGrid('home-char-grid', 'goScout');
+}
+
+function goScout(id) {
+  switchTab('scout');
+  showScoutCard(id);
+}
+
+// ================================================================
+// RENDER: CHARACTER GRID
+// ================================================================
+function charTileHTML(c, onclick) {
+  return `
+    <div class="char-tile" ${onclick ? `onclick="${onclick}"` : ''}
+         title="${c.name}">
+      <div class="char-tile-tier tier-${c.tier}">${c.tier}</div>
+      <div class="char-tile-short">${c.short}</div>
+      <div class="char-tile-name">${c.name.split(' ')[0]}</div>
+    </div>`;
+}
+
+function renderCharGrid(containerId, onClickFn, search='') {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const filtered = CHARS.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    c.short.toLowerCase().includes(search.toLowerCase())
+  );
+  el.innerHTML = filtered.map(c => charTileHTML(c, `${onClickFn}('${c.id}')`)).join('');
+}
+
+// ================================================================
+// RENDER: SCOUT TAB (matchup card + move list merged)
+// ================================================================
+function renderScoutTab() {
+  if (!state.scoutChar) {
+    document.getElementById('scout-card-section').style.display = 'none';
+    document.getElementById('scout-empty-section').style.display = 'block';
+  }
+}
+
+async function showScoutCard(id) {
+  state.scoutChar = id;
+  state.dbChar = id;
+  state.dbFilter = 'all';
+  state.dbSearch = '';
+  state.expandedMove = null;
+
+  document.getElementById('scout-empty-section').style.display = 'none';
+  document.getElementById('scout-card-section').style.display = 'block';
+  document.getElementById('scout-moves-section').style.display = 'none';
+
+  const c = getChar(id);
+  const meta = getMeta(id);
+  if (!c) return;
+
+  document.getElementById('scout-card-content').innerHTML = `
+    <div class="empty-state" style="padding:32px">
+      <div style="color:var(--text3);font-size:13px">Loading ${c.name} data…</div>
+    </div>`;
+
+  await hydrateChar(id);
+  await hydrateChar(state.myChar);
+
+  _renderScoutCard(c, meta);
+
+  document.getElementById('scout-moves-section').style.display = 'block';
+  const moveSearch = document.getElementById('scout-move-search');
+  if (moveSearch) moveSearch.value = '';
+  renderMoveTable();
+  attachDbFilters();
+}
+
+// ================================================================
+// RENDER: MOVE TABLE
+// ================================================================
+function renderMoveTable() {
+  const c = getChar(state.dbChar);
+  if (!c) return;
+
+  let moves = [...c.moves];
+
+  switch(state.dbFilter) {
+    case 'key':        moves = moves.filter(m => m.key); break;
+    case 'LOW':        moves = moves.filter(m => m.type === 'LOW'); break;
+    case 'launcher':   moves = moves.filter(m => m.oh === 'Launch'); break;
+    case 'plus':       moves = moves.filter(m => parseInt(m.ob) > 0); break;
+    case 'punishable': moves = moves.filter(m => parseInt(m.ob) <= -10); break;
+    case 'stance':     moves = moves.filter(m => m.stanceReq || m.type === 'SPEC'); break;
+  }
+
+  if (state.dbSearch) {
+    const q = state.dbSearch.toLowerCase();
+    moves = moves.filter(m =>
+      m.name.toLowerCase().includes(q) ||
+      (m.input && m.input.toLowerCase().includes(q))
+    );
+  }
+
+  const countEl = document.getElementById('scout-move-count');
+  if (countEl) countEl.textContent = `${moves.length} moves`;
+
+  const wrap = document.getElementById('scout-move-table-wrap');
+  if (!wrap) return;
+
+  if (!moves.length) {
+    wrap.innerHTML = `<div class="empty-state">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <h3>No moves found</h3>
+      <p>Try a different filter or search term</p>
+    </div>`;
+    return;
+  }
+
+  wrap.innerHTML = `
+    <div class="move-table-wrap">
+      <table class="move-table">
+        <thead>
+          <tr>
+            <th>Move</th>
+            <th>Type</th>
+            <th>Strt</th>
+            <th>Block</th>
+            <th>Hit</th>
+            <th>CH</th>
+            <th>Dmg</th>
+            <th>Props</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${moves.map((m, i) => renderMoveRow(m, i)).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function renderMoveRow(m, i) {
+  const isExpanded = state.expandedMove === i;
+  const keyClass = m.key ? 'key-move' : '';
+  const stanceTag = m.stanceReq
+    ? `<span class="prop-tag" style="color:var(--accent)">${m.stanceReq}</span>`
+    : '';
+
+  const expandRow = isExpanded ? `
+    <tr class="expand-row">
+      <td colspan="8">
+        <div class="expand-inner">
+          <div class="expand-section">
+            <h4>Counter Hit</h4>
+            <div style="font-size:14px;font-weight:700">${fmtOB(m.onCH || '\u2014')}</div>
+          </div>
+          <div class="expand-section">
+            <h4>Stance</h4>
+            <div style="font-size:13px;color:var(--text2)">${m.stanceReq || 'None'}</div>
+          </div>
+          <div class="expand-section">
+            <h4>Properties</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:3px">${renderProps(m.props || [])}</div>
+          </div>
+        </div>
+      </td>
+    </tr>` : '';
+
+  return `
+    <tr class="${keyClass}" onclick="toggleMoveExpand(${i})" style="cursor:pointer">
+      <td>
+        <div class="move-name">${m.key ? '\u2605 ' : ''}${m.name}</div>
+        <div class="move-input">${m.input || '\u2014'}</div>
+      </td>
+      <td><span class="pill ${blockTypeClass(m.type)}">${m.type || 'MID'}</span></td>
+      <td><span class="frame-val">${m.startup || '\u2014'}</span></td>
+      <td>${fmtOB(m.ob)}</td>
+      <td>${fmtOB(m.oh)}</td>
+      <td>${fmtOB(m.onCH || '\u2014')}</td>
+      <td style="font-weight:700;color:var(--text)">${m.dmg || '\u2014'}</td>
+      <td><div class="props-cell">${stanceTag}${renderProps(m.props || [])}</div></td>
+    </tr>
+    ${expandRow}`;
+}
+
+function toggleMoveExpand(i) {
+  state.expandedMove = state.expandedMove === i ? null : i;
+  renderMoveTable();
+  attachDbFilters();
+}
+
+function attachDbFilters() {
+  document.querySelectorAll('#scout-filter-bar .filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      state.dbFilter = btn.dataset.filter;
+      document.querySelectorAll('#scout-filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderMoveTable();
+      attachDbFilters();
+    };
+  });
+}
+
+
+// ================================================================
+// RENDER: COMPARE TAB
+// ================================================================
+function renderCompareTab() {
+  updateCompareContent();
+}
+
+function showCmpPicker(side) {
+  state.cmpPickSide = side;
+  document.getElementById('cmp-picker-modal').style.display = 'block';
+  renderCharGrid('cmp-char-grid', 'selectCmpChar');
+}
+
+function selectCmpChar(id) {
+  if (state.cmpPickSide === 'a') {
+    state.cmpA = id;
+    document.getElementById('cmp-a-name').textContent = getChar(id)?.name || id;
+  } else {
+    state.cmpB = id;
+    document.getElementById('cmp-b-name').textContent = getChar(id)?.name || id;
+  }
+  document.getElementById('cmp-picker-modal').style.display = 'none';
+  updateCompareContent();
+}
+
+function updateCompareContent() {
+  const el = document.getElementById('cmp-content');
+  if (!state.cmpA || !state.cmpB) {
+    el.innerHTML = `<div class="empty-state">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>
+      <h3>Select two characters</h3>
+      <p>Tap the character cards above to pick who to compare</p>
+    </div>`;
+    return;
+  }
+
+  const cA = getChar(state.cmpA);
+  const cB = getChar(state.cmpB);
+
+  function filterMoves(moves) {
+    switch(state.cmpFilter) {
+      case 'LOW':       return moves.filter(m => m.type === 'LOW');
+      case 'launcher':  return moves.filter(m => m.oh === 'Launch');
+      case 'plus':      return moves.filter(m => parseInt(m.ob) > 0);
+      case 'punishable':return moves.filter(m => parseInt(m.ob) <= -10);
+      default:          return moves;
+    }
+  }
+
+  const movesA = filterMoves(cA.moves);
+  const movesB = filterMoves(cB.moves);
+  const maxLen = Math.max(movesA.length, movesB.length);
+
+  function moveCell(m) {
+    if (!m) return '<td colspan="3"></td>';
+    return `
+      <td style="padding:6px 8px">
+        <div style="font-weight:600;font-size:12px;color:var(--text)">${m.name}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent)">${m.input}</div>
+      </td>
+      <td style="padding:6px 8px;text-align:center">
+        ${fmtOB(m.ob)}
+      </td>
+      <td style="padding:6px 8px;text-align:center;font-weight:700;color:var(--text)">
+        ${m.dmg}
+      </td>`;
+  }
+
+  el.innerHTML = `
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="background:var(--bg2);border-bottom:1px solid var(--border)">
+            <th colspan="3" style="padding:8px 10px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--accent);letter-spacing:.04em">
+              ${cA.name}
+            </th>
+            <th colspan="3" style="padding:8px 10px;text-align:left;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--orange);letter-spacing:.04em;border-left:1px solid var(--border)">
+              ${cB.name}
+            </th>
+          </tr>
+          <tr style="background:var(--bg3);border-bottom:1px solid var(--border)">
+            <th style="padding:6px 8px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)">Move</th>
+            <th style="padding:6px 8px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)">OB</th>
+            <th style="padding:6px 8px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)">Dmg</th>
+            <th style="padding:6px 8px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);border-left:1px solid var(--border)">Move</th>
+            <th style="padding:6px 8px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)">OB</th>
+            <th style="padding:6px 8px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)">Dmg</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${Array.from({length:maxLen},(_,i) => `
+            <tr style="border-bottom:1px solid var(--border)">
+              ${moveCell(movesA[i])}
+              <td style="width:1px;background:var(--border);padding:0"></td>
+              ${moveCell(movesB[i])}
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ================================================================
+// NAVIGATION
+// ================================================================
+function switchTab(tab) {
+  state.activeTab = tab;
+
+  // Update nav buttons
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+
+  // Update views
+  document.querySelectorAll('.tab-view').forEach(v => {
+    v.classList.toggle('active', v.id === `view-${tab}`);
+  });
+
+  // Render tab content
+  switch(tab) {
+    case 'home':    renderHomeTab(); break;
+    case 'scout':   renderScoutTab(); break;
+    case 'compare': renderCompareTab(); break;
+  }
+}
+
+// ================================================================
+// EVENT LISTENERS
+// ================================================================
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+document.getElementById('scout-back-btn').addEventListener('click', () => {
+  document.getElementById('scout-card-section').style.display = 'none';
+  document.getElementById('scout-empty-section').style.display = 'block';
+  state.scoutChar = null;
+  state.dbChar = null;
+});
+
+document.getElementById('home-search').addEventListener('input', e => {
+  renderCharGrid('home-char-grid', 'goScout', e.target.value);
+});
+
+document.getElementById('scout-move-search').addEventListener('input', e => {
+  state.dbSearch = e.target.value;
+  renderMoveTable();
+  attachDbFilters();
+});
+
+document.getElementById('compare-pick-a').addEventListener('click', () => showCmpPicker('a'));
+document.getElementById('compare-pick-b').addEventListener('click', () => showCmpPicker('b'));
+
+document.querySelectorAll('#cmp-filter-bar .filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.cmpFilter = btn.dataset.filter;
+    document.querySelectorAll('#cmp-filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    updateCompareContent();
+  });
+});
+
+document.querySelectorAll('#db-filter-bar .filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.dbFilter = btn.dataset.filter;
+    document.querySelectorAll('#db-filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderMoveTable();
+    attachDbFilters();
+  });
+});
+
+
+// ================================================================
+// INIT
+// ================================================================
+
+// Switcher search
+document.getElementById('switcher-search').addEventListener('input', e => {
+  renderSwitcherGrid(e.target.value);
+});
+
+// Onboarding search
+document.getElementById('onboard-search').addEventListener('input', e => {
+  renderOnboardGrid(e.target.value);
+});
+
+// Boot sequence
+renderHeaderChar();
+
+if (!state.myChar) {
+  // First launch — show onboarding
+  showOnboarding();
+  renderHomeTab();
+} else {
+  // Returning user — go straight in
+  renderHomeTab();
+}
+
+// Hydrate my character first, then background load everyone else
+(async () => {
+  if (state.myChar) {
+    await hydrateChar(state.myChar);
+    renderHomeTab();
+  }
+
+  // Background load all characters
+  for (const char of CHARS) {
+    if (char.id !== state.myChar) {
+      await hydrateChar(char.id);
+      await new Promise(r => setTimeout(r, 10));
+    }
+  }
+  console.log('T8 Scout: All character data loaded from CSV');
+})();
+</script>
+</body>
+</html>
