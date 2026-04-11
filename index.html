@@ -2015,50 +2015,104 @@ function isKeyMove(move) {
 }
 
 // Parse a full CSV text into an array of move objects
+// Uses a proper character-by-character parser that handles:
+//   - Quoted fields containing semicolons e.g. "[12;12]"
+//   - Quoted fields containing newlines (multiline notes)
+//   - Escaped quotes inside quoted fields
 function parseCSV(text, charId) {
-  // Use proper CSV parsing that handles quoted multiline fields
-  const rows = [];
-  let current = '';
-  let inQuotes = false;
 
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (ch === '"') {
-      inQuotes = !inQuotes;
-    } else if (ch === '\n' && !inQuotes) {
-      rows.push(current);
-      current = '';
-    } else {
-      current += ch;
+  // Step 1: Parse all rows into arrays of column strings
+  // handling quotes correctly at the CHARACTER level
+  function parseRows(text) {
+    const rows = [];
+    let cols = [];
+    let col = '';
+    let inQuote = false;
+    let i = 0;
+
+    while (i < text.length) {
+      const ch = text[i];
+
+      if (inQuote) {
+        if (ch === '"') {
+          // Check for escaped quote ""
+          if (text[i + 1] === '"') {
+            col += '"';
+            i += 2;
+            continue;
+          }
+          inQuote = false;
+        } else {
+          col += ch;
+        }
+      } else {
+        if (ch === '"') {
+          inQuote = true;
+        } else if (ch === ';') {
+          cols.push(col);
+          col = '';
+        } else if (ch === '\n') {
+          cols.push(col);
+          if (cols.some(c => c.trim())) rows.push(cols);
+          cols = [];
+          col = '';
+          // Handle \r\n
+          if (text[i - 1] === '\r') col = '';
+        } else if (ch === '\r') {
+          // skip carriage returns
+        } else {
+          col += ch;
+        }
+      }
+      i++;
     }
-  }
-  if (current.trim()) rows.push(current);
+    // Final column/row
+    cols.push(col);
+    if (cols.some(c => c.trim())) rows.push(cols);
 
+    return rows;
+  }
+
+  const rows = parseRows(text);
   if (rows.length < 2) return [];
+
+  // Step 2: Map column indices from header
+  // Expected: Command;Hit level;Damage;Start up frame;Block frame;Hit frame;Counter hit frame;Notes;Tags;Transitions;Wavu id;Name;Recovery;Image;Video
+  const header = rows[0].map(h => h.trim().toLowerCase());
+  const idx = {
+    command:    header.indexOf('command'),
+    hitLevel:   header.indexOf('hit level'),
+    damage:     header.indexOf('damage'),
+    startup:    header.indexOf('start up frame'),
+    block:      header.indexOf('block frame'),
+    hit:        header.indexOf('hit frame'),
+    ch:         header.indexOf('counter hit frame'),
+    notes:      header.indexOf('notes'),
+    tags:       header.indexOf('tags'),
+    transitions:header.indexOf('transitions'),
+    wavuId:     header.indexOf('wavu id'),
+    name:       header.indexOf('name'),
+    recovery:   header.indexOf('recovery'),
+  };
 
   const moves = [];
 
   for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (!row.trim()) continue;
+    const cols = rows[i];
+    const get = (index) => (index >= 0 && cols[index] !== undefined) ? cols[index].trim() : '';
 
-    // Split by semicolon respecting the already-unquoted content
-    const cols = row.split(';');
-    if (cols.length < 12) continue;
-
-    const command    = cols[0].trim();
-    const hitLevel   = cols[1].trim();
-    const damageRaw  = cols[2].trim();
-    const startupRaw = cols[3].trim();
-    const blockRaw   = cols[4].trim();
-    const hitRaw     = cols[5].trim();
-    const chRaw      = cols[6].trim();
-    const notes      = cols[7].trim();
-    const tagsRaw    = cols[8].trim();
-    const transitions= cols[9].trim();
-    // col 10 = wavu id
-    const moveName   = cols[11] ? cols[11].trim() : '';
-    const recovery   = cols[12] ? cols[12].trim() : '';
+    const command    = get(idx.command);
+    const hitLevel   = get(idx.hitLevel);
+    const damageRaw  = get(idx.damage);
+    const startupRaw = get(idx.startup);
+    const blockRaw   = get(idx.block);
+    const hitRaw     = get(idx.hit);
+    const chRaw      = get(idx.ch);
+    const notes      = get(idx.notes);
+    const tagsRaw    = get(idx.tags);
+    const transitions= get(idx.transitions);
+    const moveName   = get(idx.name);
+    const recovery   = get(idx.recovery);
 
     if (!command) continue;
 
@@ -2070,8 +2124,8 @@ function parseCSV(text, charId) {
     const type    = normalizeHitLevel(hitLevel);
     const { props, crushInfo } = parseTags(tagsRaw, notes);
 
-    // Parse stance requirement from command prefix (e.g. DES.f+2 → DES)
-    const stanceMatch = command.match(/^([A-Z][A-Z0-9]+)\./);
+    // Stance from command prefix (e.g. DES.f+2 → DES) or from transitions
+    const stanceMatch = command.match(/^([A-Z][A-Z0-9_]+)\./);
     const stanceReq = stanceMatch ? stanceMatch[1] :
                       (transitions ? transitions.split(',')[0].trim() : null);
 
@@ -2093,12 +2147,12 @@ function parseCSV(text, charId) {
     };
 
     move.key = isKeyMove(move) ? 1 : 0;
-
     moves.push(move);
   }
 
   return moves;
 }
+
 
 // Fetch and load a single character's CSV
 const CSV_CACHE = {};
