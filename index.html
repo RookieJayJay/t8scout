@@ -2437,9 +2437,9 @@ function renderHomeTab() {
   renderCharGrid('home-char-grid', 'goScout');
 }
 
-function goScout(id) {
+async function goScout(id) {
   switchTab('scout');
-  showScoutCard(id);
+  await showScoutCard(id);
 }
 
 // ================================================================
@@ -2495,14 +2495,26 @@ async function showScoutCard(id) {
       <div style="color:var(--text3);font-size:13px">Loading ${c.name} data…</div>
     </div>`;
 
-  await hydrateChar(id);
-  await hydrateChar(state.myChar);
+  // Wait for both to hydrate fully before rendering anything
+  await Promise.all([
+    hydrateChar(id),
+    hydrateChar(state.myChar)
+  ]);
 
+  // Now render with real data
   _renderScoutCard(c, meta);
 
+  // Show move list and reset filters
   document.getElementById('scout-moves-section').style.display = 'block';
   const moveSearch = document.getElementById('scout-move-search');
   if (moveSearch) moveSearch.value = '';
+  state.dbSearch = '';
+
+  // Reset filter bar UI
+  document.querySelectorAll('#scout-filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
+  const allBtn = document.querySelector('#scout-filter-bar .filter-btn[data-filter="all"]');
+  if (allBtn) allBtn.classList.add('active');
+
   renderMoveTable();
   attachDbFilters();
 }
