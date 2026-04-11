@@ -841,7 +841,10 @@ body{
     <div id="char-switcher-inner">
       <div id="switcher-header">
         <div id="switcher-title">Change Character</div>
-        <button id="switcher-close" onclick="closeSwitcherDirect()">✕</button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button onclick="resetApp()" style="height:28px;padding:0 10px;background:none;border:1px solid var(--border2);border-radius:4px;color:var(--text3);font-family:'Barlow',sans-serif;font-size:11px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'">Reset</button>
+          <button id="switcher-close" onclick="closeSwitcherDirect()">✕</button>
+        </div>
       </div>
       <div class="search-wrap" style="padding:12px 16px 0;margin-bottom:0">
         <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -2291,6 +2294,18 @@ function closeSwitcher(e) {
   if (e.target === document.getElementById('char-switcher')) {
     closeSwitcherDirect();
   }
+}
+
+function resetApp() {
+  localStorage.removeItem('t8s_mychar');
+  state.myChar = null;
+  state.onboardSelected = null;
+  state.scoutChar = null;
+  state.dbChar = null;
+  closeSwitcherDirect();
+  renderHeaderChar();
+  renderHomeTab();
+  showOnboarding();
 }
 
 function renderSwitcherGrid(search) {
